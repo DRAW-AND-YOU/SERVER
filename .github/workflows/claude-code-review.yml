@@ -28,6 +28,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # 전체 히스토리로 더 정확한 diff 분석
+          
+      - name: Fetch base branch
+        run: |
+          git fetch origin ${{ github.base_ref }}:${{ github.base_ref }}
+          echo "BASE_SHA=$(git merge-base HEAD origin/${{ github.base_ref }})" >> $GITHUB_ENV
 
       - name: Run Claude Code Review
         id: claude-review
@@ -35,134 +40,123 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
-            이 PR에 대해 전반적인 리뷰와 라인별 상세 분석을 모두 수행하여 한글로 코드 리뷰를 작성해주세요.
+            이 PR의 최신 변경사항에 대해 GitHub 인라인 리뷰를 한글로 작성해주세요.
             
-            ## 📋 Part 1: 전반적인 코드 리뷰
+            ## 🔍 Step 1: 변경사항 및 기존 리뷰 확인
             
-            다음 관점에서 PR 전체를 평가:
-            - 코드 품질 및 모범 사례 준수
-            - 아키텍처 및 설계 패턴
-            - 테스트 커버리지 및 품질
-            - 문서화 수준
+            먼저 다음 명령들을 실행하여 현재 상태를 파악:
             
-            ## 🔍 Part 2: 라인별 상세 분석
-            
-            ### 2-1. 변경사항 확인
             ```bash
+            # 1. PR의 최신 변경사항 확인 (최신 커밋 기준)
             gh pr diff ${{ github.event.pull_request.number }} --color never
+            
+            # 2. 기존에 작성된 리뷰 코멘트 확인 (중복 방지)
+            gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments --jq '.[].body' | head -20
+            
+            # 3. 이미 해결된 conversations 확인
+            gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews --jq '.[].state'
             ```
             
-            ### 2-2. 각 파일별 체크리스트
+            ## 📝 Step 2: 인라인 코드 리뷰 작성
             
-            #### 필수 검토 항목
-            - **🚨 심각한 문제** (즉시 수정 필요)
-              - NullPointerException, ArrayIndexOutOfBounds
-              - 메모리 누수, 무한 루프
-              - SQL Injection, XSS, 하드코딩된 인증 정보
-              - 데이터 무결성 위반
+            GitHub의 실제 인라인 리뷰 기능을 사용하여 코드 라인에 직접 코멘트를 답니다.
+            이미 리뷰한 내용은 중복해서 작성하지 마세요.
             
-            - **⚠️ 경고** (수정 권장)
-              - N+1 쿼리 문제
-              - 비효율적인 알고리즘 (O(n²) 이상)
-              - 부적절한 예외 처리
-              - 테스트 누락
-            
-            - **💡 개선 제안** (선택적)
-              - 코드 중복 (DRY 원칙 위반)
-              - 긴 메소드 (20줄 초과)
-              - 복잡한 조건문 (3중 이상 중첩)
-              - 매직 넘버, 하드코딩된 값
-            
-            - **📝 스타일** (컨벤션)
-              - 명명 규칙 위반
-              - 포맷팅 이슈
-              - 주석 부족
-            
-            ### 2-3. 라인별 코멘트 작성
-            
-            문제를 발견하면 다음 형식으로 구체적인 피드백 제공:
+            ### 리뷰 시작 및 인라인 코멘트 작성 방법:
             
             ```bash
-            gh pr comment ${{ github.event.pull_request.number }} --body "
-            ## [이모지] [카테고리] 파일명:라인번호
+            # 리뷰 시작
+            REVIEW_ID=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews \
+              --method POST \
+              --field event="COMMENT" \
+              --field body="🔍 코드 리뷰를 시작합니다..." \
+              --jq '.id')
             
-            ### 현재 코드
-            \`\`\`java
-            // 실제 문제가 있는 코드
-            \`\`\`
-            
-            ### 문제점
-            - 구체적인 문제 설명
-            - 발생 가능한 상황
-            
-            ### 개선안
-            \`\`\`java
-            // 개선된 코드 예시
-            \`\`\`
-            
-            ### 설명
-            - 왜 이렇게 수정해야 하는지
-            - 기대 효과
-            "
+            # 각 문제가 있는 라인에 인라인 코멘트 작성
+            # 예시: 특정 파일의 특정 라인에 코멘트
+            gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments \
+              --method POST \
+              --field path="src/main/java/com/example/UserService.java" \
+              --field line=45 \
+              --field side="RIGHT" \
+              --field body="🚨 **NPE 위험**
+              
+              \`user.getName()\`이 null일 수 있습니다.
+              
+              **개선안:**
+              \`\`\`java
+              Optional.ofNullable(user.getName())
+                .map(String::toUpperCase)
+                .orElse(\"UNKNOWN\")
+              \`\`\`"
             ```
             
-            ## 📊 Part 3: 종합 요약 리포트
+            ### 검토 항목별 우선순위:
             
-            PR 전체에 대한 최종 종합 평가를 다음 형식으로 작성:
+            #### 1. 🚨 심각한 문제 (반드시 인라인 코멘트)
+            - NullPointerException, ArrayIndexOutOfBounds
+            - 메모리 누수, 무한 루프 가능성
+            - SQL Injection, XSS 취약점
+            - 하드코딩된 인증 정보
+            - 데이터 무결성 위반
+            
+            #### 2. ⚠️ 경고 (인라인 코멘트 권장)
+            - N+1 쿼리 문제
+            - O(n²) 이상의 비효율적 알고리즘
+            - 부적절한 예외 처리
+            - 테스트 누락
+            
+            #### 3. 💡 개선 제안 (선택적 인라인 코멘트)
+            - 코드 중복 (3회 이상)
+            - 20줄 초과 메소드
+            - 3중 이상 중첩 조건문
+            - 매직 넘버
+            
+            #### 4. ✅ 칭찬 (좋은 코드에 대한 긍정 피드백)
+            - 잘 작성된 패턴
+            - 좋은 테스트 케이스
+            - 명확한 변수명
+            
+            ## 📊 Step 3: 종합 리뷰 요약
+            
+            모든 인라인 코멘트를 작성한 후, PR 전체에 대한 종합 리뷰를 작성:
             
             ```bash
-            gh pr comment ${{ github.event.pull_request.number }} --body "
-            # 🎯 코드 리뷰 종합 결과
+            gh pr review ${{ github.event.pull_request.number }} \
+              --comment \
+              --body "# 🎯 코드 리뷰 종합 결과
             
             ## 📈 전체 평가
             | 항목 | 평가 | 점수 |
             |------|------|------|
-            | 코드 품질 | [평가 내용] | ⭐⭐⭐⭐☆ |
-            | 설계/아키텍처 | [평가 내용] | ⭐⭐⭐⭐⭐ |
-            | 성능 | [평가 내용] | ⭐⭐⭐☆☆ |
-            | 보안 | [평가 내용] | ⭐⭐⭐⭐☆ |
-            | 테스트 | [평가 내용] | ⭐⭐⭐☆☆ |
+            | 코드 품질 | [평가] | ⭐⭐⭐⭐☆ |
+            | 테스트 | [평가] | ⭐⭐⭐☆☆ |
+            | 보안 | [평가] | ⭐⭐⭐⭐☆ |
             
-            ## 🔍 발견된 이슈 요약
-            - 🚨 **심각**: [N]개 - 즉시 수정 필요
-            - ⚠️ **경고**: [N]개 - 수정 권장
-            - 💡 **제안**: [N]개 - 개선 가능
-            - 📝 **스타일**: [N]개 - 컨벤션 관련
+            ## 🔍 발견된 이슈
+            - 🚨 심각: N개 (인라인 코멘트 참조)
+            - ⚠️ 경고: N개 (인라인 코멘트 참조)
+            - 💡 제안: N개 (인라인 코멘트 참조)
             
-            ## 🚨 즉시 수정이 필요한 항목
-            1. [파일명:라인] - [간단한 설명]
-            2. [파일명:라인] - [간단한 설명]
+            ## ✅ 잘한 점
+            - [구체적인 칭찬]
             
-            ## ✨ 잘한 점
-            - [구체적인 칭찬 포인트]
-            - [좋은 패턴이나 구현]
-            
-            ## 📋 권장 사항
-            1. **단기 (이번 PR)**
-               - [즉시 적용 가능한 개선사항]
-            
-            2. **장기 (향후 개선)**
-               - [리팩토링이나 구조 개선 제안]
-            
-            ## ✅ 체크리스트
+            ## 📋 머지 전 체크리스트
             - [ ] 모든 심각한 이슈 해결
-            - [ ] 단위 테스트 추가/수정
+            - [ ] 테스트 추가
             - [ ] 문서 업데이트
-            - [ ] 성능 영향 검토
-            - [ ] 보안 취약점 검토
             
-            ---
-            💬 질문이나 논의가 필요한 부분이 있다면 코멘트로 알려주세요!
-            "
+            인라인 코멘트를 확인해주세요! 👆"
             ```
             
             ## 🎯 리뷰 원칙
-            1. **모든 피드백은 한글로 작성**
-            2. **구체적이고 실행 가능한 피드백** 제공
-            3. **긍정적인 피드백도 반드시 포함**
-            4. **우선순위를 명확히** 구분
-            5. **학습 기회 제공** - 왜 그렇게 해야 하는지 설명
-            6. **코드 예시 포함** - 개선안은 항상 코드로 보여주기
+            1. **중복 리뷰 방지**: 이미 작성된 리뷰는 다시 작성하지 않음
+            2. **최신 변경사항만 리뷰**: 새로 추가되거나 수정된 코드만 검토
+            3. **인라인 코멘트 우선**: 구체적인 피드백은 해당 코드 라인에 직접 작성
+            4. **한글로 작성**: 모든 리뷰는 한글로 작성
+            5. **건설적 피드백**: 문제점과 함께 반드시 개선안 제시
+            6. **긍정적 피드백 포함**: 잘 작성된 코드도 칭찬
+            
             
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://docs.anthropic.com/en/docs/claude-code/sdk#command-line for available options
