@@ -1,7 +1,7 @@
 ---
 name: Issue Template
 about: 이슈 생성을 위한 템플릿입니다.
-title: "[Type] #Number Conents"
+title: "[Type] #Number Contents"
 labels: ''
 assignees: ''
 
