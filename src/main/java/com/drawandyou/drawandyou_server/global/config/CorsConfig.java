@@ -17,7 +17,9 @@ public class CorsConfig {
         configuration.setAllowedOrigins(
                 Arrays.asList("http://localhost:3000", "https://localhost:3000",
                         "https://api.drawandyou.com",
-                        "https://www.drawandyou.com"));
+                        "https://www.drawandyou.com",
+                        "http://api.drawandyou.com",
+                        "http://www.drawandyou.com"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setExposedHeaders(Arrays.asList("Authorization", "RefreshToken"));
