@@ -1,4 +1,4 @@
-package com.drawandyou.drawandyou_server.global;
+package com.drawandyou.drawandyou_server.global.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

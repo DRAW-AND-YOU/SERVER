@@ -1,6 +1,6 @@
 package com.drawandyou.drawandyou_server.user.domain.entity;
 
-import com.drawandyou.drawandyou_server.global.BaseEntity;
+import com.drawandyou.drawandyou_server.global.entity.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
