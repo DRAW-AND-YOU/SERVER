@@ -6,6 +6,7 @@ import com.drawandyou.drawandyou_server.user.domain.entity.User;
 import com.drawandyou.drawandyou_server.user.domain.repository.UserRepository;
 import com.drawandyou.drawandyou_server.user.exception.InvalidPasswordException;
 import com.drawandyou.drawandyou_server.user.exception.UserAlreadyExistsException;
+import com.drawandyou.drawandyou_server.user.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -52,13 +53,14 @@ public class UserService {
 
     // username, password 비교하여 사용자 반환
     public User getByCredentials(final String username, final String password, final PasswordEncoder encoder) {
-        User originalUser = userRepository.findByUsername(username);
+        User originalUser = userRepository.findOptionalByUsername(username)
+                .orElseThrow(UserNotFoundException::new);
 
-        if (originalUser != null && encoder.matches(password, originalUser.getPassword())) {
-            return originalUser;
-        } // 입력값과 암호화된 값을 비교해줌
+        if (!encoder.matches(password, originalUser.getPassword())) {
+            throw new InvalidPasswordException();
+        }
 
-        return null;
+        return originalUser;
     }
 
 
