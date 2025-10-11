@@ -78,4 +78,19 @@ public class UserService {
                 .token(token)
                 .build();
     }
+
+    /**
+     * 사용자 ID로 사용자 정보 조회
+     * @param userId 사용자 ID
+     * @return UserAuthDto (비밀번호 제외)
+     */
+    public UserAuthDto getUserById(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+
+        return UserAuthDto.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .build();
+    }
 }
