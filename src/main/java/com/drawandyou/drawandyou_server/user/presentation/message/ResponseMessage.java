@@ -7,6 +7,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum ResponseMessage {
 
-    TEST_SUCCESS("유저 테스트에 성공하였습니다");
+    TEST_SUCCESS("유저 테스트에 성공하였습니다"),
+    USER_SIGNUP_SUCCESS("회원가입에 성공했습니다"),
+    USER_SIGNIN_SUCCESS("로그인에 성공했습니다");
+
     private final String message;
 }
