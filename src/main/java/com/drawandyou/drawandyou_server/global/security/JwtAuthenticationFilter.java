@@ -2,6 +2,7 @@ package com.drawandyou.drawandyou_server.global.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -51,9 +53,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try{
-            String token = parseBearerToken(request); // Authorization Header 에서 토큰 파싱
+            // 1. Authorization Header에서 Bearer 토큰 추출 시도
+            String token = parseBearerToken(request);
 
-            log.info("doFilterInternal");
+            // 2. Header에 토큰이 없으면 쿠키에서 추출 시도
+            if (token == null) {
+                token = parseTokenFromCookie(request);
+            }
+
+            log.info("doFilterInternal - Token source: {}", token != null ? "found" : "not found");
 
             if (token != null && !token.equalsIgnoreCase("null")) {
                 String userId = tokenProvider.validateAndGetUserId(token);
@@ -87,6 +95,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    /**
+     * Authorization Header에서 Bearer 토큰 추출
+     */
     private String parseBearerToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
 
@@ -95,5 +106,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         return null;
+    }
+
+    /**
+     * 쿠키에서 JWT 토큰 추출
+     * OAuthSuccessHandler에서 설정한 HttpOnly 쿠키에서 accessToken 추출
+     */
+    private String parseTokenFromCookie(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies == null) {
+            return null;
+        }
+
+        return Arrays.stream(cookies)
+                .filter(cookie -> "accessToken".equals(cookie.getName()))
+                .findFirst()
+                .map(Cookie::getValue)
+                .orElse(null);
     }
 }

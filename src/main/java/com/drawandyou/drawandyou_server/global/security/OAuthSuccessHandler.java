@@ -36,6 +36,16 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         TokenProvider tokenProvider = new TokenProvider(); // jwt 토큰 발급을 위한 객체 생성
         String token = tokenProvider.create(authentication); // 인증 정보 기반으로 jwt 토큰 생성
 
+        // HttpOnly 쿠키로 JWT 토큰 전달 (보안 강화)
+        Cookie tokenCookie = new Cookie("accessToken", token);
+        tokenCookie.setHttpOnly(true);  // JavaScript 접근 차단 (XSS 방어)
+        tokenCookie.setSecure(false);   // 로컬 개발 환경에서는 false, 프로덕션에서는 true (HTTPS 필수)
+        tokenCookie.setPath("/");       // 모든 경로에서 쿠키 전송
+        tokenCookie.setMaxAge(60 * 60); // 1시간 유효
+
+        response.addCookie(tokenCookie);
+        log.info("JWT token set in HttpOnly cookie");
+
         // 요청에 포함된 쿠키 중 redirect_url 이름의 쿠키를 찾아 Optional 로 래핑
         Optional<Cookie> oCookie = Arrays.stream(request.getCookies())
                 .filter(cookie -> cookie.getName().equals(REDIRECT_URL_PARAM))
@@ -44,11 +54,9 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         // 쿠키가 존재하면 값 추출, 없으면 optional.empty
         Optional<String> redirectUrl = oCookie.map(Cookie::getValue);
 
-        // 쿠키값 존재하면 해당 값 사용. 없으면 기본 주소 사용후
-        // 이후 jwt 토큰을 쿼리 파라미터로 추가
-        String targetUrl = redirectUrl.orElseGet(() -> LOCAL_REDIRECT_URL) + "/sociallogin?token=" + token;
+        // 토큰 없이 리다이렉트 (쿠키로 전달되므로 URL에 노출 안 됨)
+        String targetUrl = redirectUrl.orElseGet(() -> LOCAL_REDIRECT_URL) + "/auth/callback";
 
         response.sendRedirect(targetUrl); // 사용자를 최종 url 로 리다이렉트
-
     }
 }
