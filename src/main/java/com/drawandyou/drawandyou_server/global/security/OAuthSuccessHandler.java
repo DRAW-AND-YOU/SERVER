@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -37,18 +36,15 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         TokenProvider tokenProvider = new TokenProvider(); // jwt 토큰 발급을 위한 객체 생성
         String token = tokenProvider.create(authentication); // 인증 정보 기반으로 jwt 토큰 생성
 
-        // ResponseCookie를 사용하여 SameSite 속성 포함한 쿠키 생성
-        ResponseCookie tokenCookie = ResponseCookie.from("accessToken", token)
-                .httpOnly(true)         // JavaScript 접근 차단 (XSS 방어)
-                .secure(false)          // 로컬 개발: false, 프로덕션: true (HTTPS 필수)
-                .path("/")              // 모든 경로에서 쿠키 전송
-                .maxAge(60 * 60)        // 1시간 유효
-                .domain("localhost")    // 명시적으로 localhost 도메인 설정
-                .sameSite("Lax")        // CSRF 방어 (Lax: 일반적인 cross-site 요청에서는 전송 안 됨)
-                .build();
+        // HttpOnly 쿠키로 JWT 토큰 전달 (보안 강화)
+        Cookie tokenCookie = new Cookie("accessToken", token);
+        tokenCookie.setHttpOnly(true);  // JavaScript 접근 차단 (XSS 방어)
+        tokenCookie.setSecure(false);   // 로컬 개발 환경에서는 false, 프로덕션에서는 true (HTTPS 필수)
+        tokenCookie.setPath("/");       // 모든 경로에서 쿠키 전송
+        tokenCookie.setMaxAge(60 * 60); // 1시간 유효
 
-        response.addHeader("Set-Cookie", tokenCookie.toString());
-        log.info("JWT token set in HttpOnly cookie with domain=localhost, SameSite=Lax");
+        response.addCookie(tokenCookie);
+        log.info("JWT token set in HttpOnly cookie");
 
         // 요청에 포함된 쿠키 중 redirect_url 이름의 쿠키를 찾아 Optional 로 래핑
         Optional<Cookie> oCookie = Arrays.stream(request.getCookies())
