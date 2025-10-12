@@ -1,8 +1,11 @@
 package com.drawandyou.drawandyou_server.global.config;
 
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +16,7 @@ import java.util.List;
 @Configuration
 public class SwaggerConfig {
 
+    private static final String JWT_SCHEME = "jwtAuth";
     private final Environment environment;
 
     public SwaggerConfig(Environment environment) {
@@ -26,7 +30,18 @@ public class SwaggerConfig {
 
         return new OpenAPI()
                 .info(apiInfo())
-                .servers(List.of(new Server().url(serverUrl).description("API Server")));
+                .servers(List.of(new Server().url(serverUrl).description("API Server")))
+                .addSecurityItem(new SecurityRequirement().addList(JWT_SCHEME))
+                .components(new Components()
+                        .addSecuritySchemes(JWT_SCHEME,
+                                new SecurityScheme()
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .scheme("bearer")
+                                        .bearerFormat("JWT")
+                                        .in(SecurityScheme.In.HEADER)
+                                        .name("Authorization")
+                        )
+                );
     }
 
     private String getServerUrl() {

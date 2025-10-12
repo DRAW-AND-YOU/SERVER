@@ -93,4 +93,23 @@ public class UserService {
                 .username(user.getUsername())
                 .build();
     }
+
+    /**
+     * 사용자 ID로 JWT 토큰 발급
+     * @param userId 사용자 ID
+     * @return UserAuthDto (사용자 정보 + JWT 토큰)
+     */
+    public UserAuthDto issueTokenByUserId(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+
+        // 사용자 ID 기반으로 JWT 토큰 생성
+        final String token = tokenProvider.createByUserId(userId);
+
+        return UserAuthDto.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .token(token)
+                .build();
+    }
 }
