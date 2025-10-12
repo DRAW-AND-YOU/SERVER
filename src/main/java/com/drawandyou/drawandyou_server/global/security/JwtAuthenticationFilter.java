@@ -35,8 +35,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // 이 요청에 대해서는 필터를 적용할 필요가 없겠지!
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+
+        // OPTIONS 메서드는 필터 대상 아님
         if (request.getMethod().equals("OPTIONS")) {
-            return true; // options 메서드는 필터 대상 아님 . true 반환시 필터 동작 x
+            return true;
+        }
+
+        // /auth/** 경로는 필터를 건너뜀 (인증 불필요)
+        if (path.startsWith("/auth/")) {
+            return true;
         }
 
         return false; // false 반환시 필터 동작 o
