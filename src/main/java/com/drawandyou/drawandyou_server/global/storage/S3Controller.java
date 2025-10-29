@@ -21,7 +21,7 @@ public class S3Controller {
 
     @Operation(summary = "S3 Presigned URL 발급")
     @PostMapping("/presigned-url")
-    public ApiResponse<PresignedUrlResponse> getS3PresignedUrl(PresignedUrlCreateRequest presignedUrlCreateRequest){
+    public ApiResponse<PresignedUrlResponse> getS3PresignedUrl(@RequestBody PresignedUrlCreateRequest presignedUrlCreateRequest){
         PresignedUrlResponse response = s3Service.createPresignedUrl(presignedUrlCreateRequest);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.PRESIGNED_URL_CREATE_SUCCESS.getMessage(), response);
     }
