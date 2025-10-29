@@ -1,4 +1,4 @@
-package com.drawandyou.drawandyou_server.drawing.exception;
+package com.drawandyou.drawandyou_server.global.storage.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum ErrorMessage {
 
-    MIM_TYPE_NOT_JPG_EXCEPTION("mime type 이 image/jpg 가 아닙니다.");
+    INVALID_MIME_TYPE("올바르지 않은 mime type 입니다.");
 
     private final String message;
 }

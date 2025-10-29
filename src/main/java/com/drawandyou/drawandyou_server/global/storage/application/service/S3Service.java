@@ -2,7 +2,7 @@ package com.drawandyou.drawandyou_server.global.storage.application.service;
 
 import com.drawandyou.drawandyou_server.global.config.S3Config;
 import com.drawandyou.drawandyou_server.global.storage.application.service.enums.AllowedMimeType;
-import com.drawandyou.drawandyou_server.drawing.exception.MimeTypeNotJPGException;
+import com.drawandyou.drawandyou_server.global.storage.exception.InvalidMimeTypeException;
 import com.drawandyou.drawandyou_server.global.storage.presentation.dto.request.PresignedUrlCreateRequest;
 import com.drawandyou.drawandyou_server.global.storage.presentation.dto.response.PresignedUrlResponse;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ public class S3Service {
         if (mimeType.startsWith("image")){
             key = "image/" + uuid + "." + extension;
         } else{
-            throw new MimeTypeNotJPGException();
+            throw new InvalidMimeTypeException();
         }
 
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
@@ -51,7 +51,7 @@ public class S3Service {
 
     private String getExtensionFromMimeType(String mimeType) {
         if (!AllowedMimeType.ALLOWED_MIME_TYPES.contains(mimeType)) {
-            throw new MimeTypeNotJPGException();
+            throw new InvalidMimeTypeException();
         }
         int slashIndex = mimeType.lastIndexOf('/');
         return mimeType.substring(slashIndex + 1); // "png"
