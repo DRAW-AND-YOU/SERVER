@@ -3,13 +3,17 @@ package com.drawandyou.drawandyou_server.user.presentation;
 import com.drawandyou.drawandyou_server.global.auth.presentation.dto.UserAuthDto;
 import com.drawandyou.drawandyou_server.global.common.response.ApiResponse;
 import com.drawandyou.drawandyou_server.user.application.service.UserService;
+import com.drawandyou.drawandyou_server.user.presentation.dto.request.LoginRequest;
+import com.drawandyou.drawandyou_server.user.presentation.dto.request.RegisterRequest;
+import com.drawandyou.drawandyou_server.user.presentation.dto.response.CurrentLoginUserResponse;
+import com.drawandyou.drawandyou_server.user.presentation.dto.response.LoginResponse;
+import com.drawandyou.drawandyou_server.user.presentation.dto.response.RegisterResponse;
 import com.drawandyou.drawandyou_server.user.presentation.message.ResponseMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,27 +29,23 @@ public class UserController {
     private final UserService userService;
     /**
      * 일반 로그인 - 회원가입
-     * @param userDTO
-     * @return
      */
     @Operation(summary = "일반 회원가입")
     @PostMapping("/signup")
-    public ApiResponse<UserAuthDto> registerUser(@RequestBody UserAuthDto userDTO) {
+    public ApiResponse<RegisterResponse> registerUser(@RequestBody RegisterRequest registerRequest) {
 
-        UserAuthDto response = userService.registerUser(userDTO);
+        RegisterResponse response = userService.registerUser(registerRequest);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.USER_SIGNUP_SUCCESS.getMessage(), response);
     }
 
     /**
      * 일반 로그인 - 로그인
-     * @param userDTO
-     * @return
      */
     @Operation(summary = "일반 로그인")
     @PostMapping("/signin")
-    public ApiResponse<UserAuthDto> authenticate(@RequestBody UserAuthDto userDTO) {
+    public ApiResponse<LoginResponse> authenticate(@RequestBody LoginRequest loginRequest) {
 
-        UserAuthDto response = userService.signIn(userDTO.username(), userDTO.password());
+        LoginResponse response = userService.signIn(loginRequest.username(), loginRequest.password());
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.USER_SIGNIN_SUCCESS.getMessage(), response);
     }
 
@@ -57,10 +57,10 @@ public class UserController {
      */
     @Operation(summary = "현재 로그인 사용자 정보 조회")
     @GetMapping("/me")
-    public ApiResponse<UserAuthDto> getCurrentUser(@AuthenticationPrincipal Long userId) {
+    public ApiResponse<CurrentLoginUserResponse> getCurrentUser(@AuthenticationPrincipal Long userId) {
 
         // userId는 JWT 토큰에서 추출되어 SecurityContext에 설정된 값
-        UserAuthDto response = userService.getUserById(userId);
+        CurrentLoginUserResponse response = userService.getUserById(userId);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.USER_INFO_SUCCESS.getMessage(), response);
     }
 }

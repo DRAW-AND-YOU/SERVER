@@ -46,29 +46,11 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         OAuthAttributes attributes = OAuthAttributes.of(registrationId, userNameAttributeName, oAuth2User.getAttributes());
 
         // 사용자 정보 추출
-        String nameAttributeKey = attributes.getNameAttributeKey(); //사용자 식별 키
         String name = attributes.getName();
         String email = attributes.getEmail();
-        String picture = attributes.getPicture();
-        String id = attributes.getId(); // 고유 id
-        String socialType = "google"; //현재는 구글만 지원한다고 가정
-
-        // 소셜 로그인 제공자에따라 socialtYPE 설정
-//        if (registrationId.equals("naver")) {
-//            socialType = "naver";
-//        } else if (registrationId.equals("kakao")) {
-//            socialType = "kakao";
-//        } else if (registrationId.equals("github")) {
-//            socialType = "github";
-//
-//            // 깃허브의 경우 이메일이 없을 수 있기 때문에 추가요청으로 가져온다
-//            if (email == null) {
-//                email = getEmailFromGitHub(userRequest.getAccessToken().getTokenValue());
-//            }
-//        } else{
-//            socialType = "google";
-//
-//        }
+        // String picture = attributes.getPicture(); // 프로필 사진 - 현재 사용하지 않음
+        // String id = attributes.getId(); // 고유 id - 현재 사용하지 않음
+        String socialType = "google"; // 구글만 지원
 
 
 
@@ -83,25 +65,24 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_USER");
         authories.add(authority);
 
-        // 카카오에서 이메일이 없는 경우 대체 username 생성
-        String username = email;
-        if (username == null || username.isEmpty()) {
-            username = socialType + "_" + id; // 예: kakao_123456789
-        }
+        // username에는 실제 사용자 이름 저장, email은 별도 필드에 저장
+        String username = name; // 구글에서 제공하는 실제 이름
 
-        String authProvider = socialType;// oauth 제공자 정보
+        String authProvider = socialType; // oauth 제공자 정보
 
         User userEntity = null; // 사용자 정보 저장 객체
 
-        // 사용자 정보 없으면 새로 저장
-        if (!userRepository.existsByUsername(username)) {
+        // 이메일로 기존 사용자 확인 (이메일을 고유 식별자로 사용)
+        if (!userRepository.existsByEmail(email)) {
+            // 새로운 사용자 생성
             userEntity = User.builder()
-                    .username(username)
+                    .username(username)  // 실제 사용자 이름
+                    .email(email)        // 이메일 주소
                     .authProvider(authProvider)
                     .build();
             userEntity = userRepository.save(userEntity);
-        } else{
-            userEntity = userRepository.findByUsername(username); // 기존 사용자 조회
+        } else {
+            userEntity = userRepository.findByEmail(email); // 기존 사용자 조회
         }
 
 

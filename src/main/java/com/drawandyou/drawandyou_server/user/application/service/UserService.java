@@ -7,6 +7,10 @@ import com.drawandyou.drawandyou_server.user.domain.repository.UserRepository;
 import com.drawandyou.drawandyou_server.user.exception.InvalidPasswordException;
 import com.drawandyou.drawandyou_server.user.exception.UserAlreadyExistsException;
 import com.drawandyou.drawandyou_server.user.exception.UserNotFoundException;
+import com.drawandyou.drawandyou_server.user.presentation.dto.request.RegisterRequest;
+import com.drawandyou.drawandyou_server.user.presentation.dto.response.CurrentLoginUserResponse;
+import com.drawandyou.drawandyou_server.user.presentation.dto.response.LoginResponse;
+import com.drawandyou.drawandyou_server.user.presentation.dto.response.RegisterResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,21 +26,21 @@ public class UserService {
     private final TokenProvider tokenProvider;
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public UserAuthDto registerUser(UserAuthDto userDTO) {
+    public RegisterResponse registerUser(RegisterRequest registerRequestDto) {
 
-        if (userDTO == null || userDTO.password() == null) {
+        if (registerRequestDto == null || registerRequestDto.password() == null) {
             throw new InvalidPasswordException();
         }
 
         User user = User.builder()
-                .username(userDTO.username())
-                .password(passwordEncoder.encode(userDTO.password()))
+                .username(registerRequestDto.username())
+                .password(passwordEncoder.encode(registerRequestDto.password()))
                 .build();
 
         User registeredUser = create(user);
 
-        return UserAuthDto.builder()
-                .id(registeredUser.getId())
+        return RegisterResponse.builder()
+                .userId(registeredUser.getId())
                 .username(registeredUser.getUsername())
                 .build();
     }
@@ -64,18 +68,17 @@ public class UserService {
     }
 
 
-    public UserAuthDto signIn(String username, String password) {
+    public LoginResponse signIn(String username, String password) {
 
         User user = getByCredentials(username, password, passwordEncoder);
         // 인증 성공시 jwt 토큰 발급
         final String token = tokenProvider.create(user);
 
         // 응답 객체에 사용자 정보 및 토큰 포함 (비밀번호 같은 민감 정보 포함 x)
-
-        return UserAuthDto.builder()
+        return LoginResponse.builder()
+                .userId(user.getId())
                 .username(user.getUsername())
-                .id(user.getId())
-                .token(token)
+                .accessToken(token)
                 .build();
     }
 
@@ -84,12 +87,12 @@ public class UserService {
      * @param userId 사용자 ID
      * @return UserAuthDto (비밀번호 제외)
      */
-    public UserAuthDto getUserById(Long userId) {
+    public CurrentLoginUserResponse getUserById(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
 
-        return UserAuthDto.builder()
-                .id(user.getId())
+        return CurrentLoginUserResponse.builder()
+                .userId(user.getId())
                 .username(user.getUsername())
                 .build();
     }
