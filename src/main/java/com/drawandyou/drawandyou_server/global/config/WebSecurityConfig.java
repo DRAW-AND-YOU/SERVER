@@ -57,7 +57,18 @@ public class WebSecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // 세션 사용 안함 (jwt 기반이기 때문에) . 매우 중요
                 .authorizeHttpRequests(auth-> auth
-                        .requestMatchers("/", "/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll() // 루트, /auth, Swagger 경로는 인증 없이 허용
+                        // Public endpoints (인증 불필요)
+                        .requestMatchers(
+                                "/",
+                                "/api/auth/**",
+                                "/api/user/signup",
+                                "/api/user/signin",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**"
+                        ).permitAll()
+                        // 나머지 모든 /api/** 경로는 인증 필요
+                        .requestMatchers("/api/**").authenticated()
                         .anyRequest().authenticated())// 나머지 요청은 인증이 필요함
                 // jwt 필터를 UsernamePassWordFilter 뒤에 실행되도록 추가!
                 .addFilterAfter(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
