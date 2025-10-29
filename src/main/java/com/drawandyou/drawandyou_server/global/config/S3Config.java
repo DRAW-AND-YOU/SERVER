@@ -1,5 +1,6 @@
 package com.drawandyou.drawandyou_server.global.config;
 
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +20,10 @@ public class S3Config {
 
     @Value("${spring.cloud.aws.region.static}")
     private String region;
+
+    @Getter
+    @Value("${spring.cloud.aws.s3.bucket}")
+    private String bucket;
 
     @Bean
     public S3Client s3Client() {

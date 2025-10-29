@@ -57,10 +57,10 @@ public class UserController {
      */
     @Operation(summary = "현재 로그인 사용자 정보 조회")
     @GetMapping("/me")
-    public ApiResponse<UserAuthDto> getCurrentUser(@AuthenticationPrincipal String userId) {
+    public ApiResponse<UserAuthDto> getCurrentUser(@AuthenticationPrincipal Long userId) {
 
         // userId는 JWT 토큰에서 추출되어 SecurityContext에 설정된 값
-        UserAuthDto response = userService.getUserById(Long.parseLong(userId));
+        UserAuthDto response = userService.getUserById(userId);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.USER_INFO_SUCCESS.getMessage(), response);
     }
 }
