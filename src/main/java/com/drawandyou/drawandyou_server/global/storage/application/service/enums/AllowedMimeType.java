@@ -1,4 +1,4 @@
-package com.drawandyou.drawandyou_server.image.application.service.enums;
+package com.drawandyou.drawandyou_server.global.storage.application.service.enums;
 
 import java.util.Set;
 public class AllowedMimeType {

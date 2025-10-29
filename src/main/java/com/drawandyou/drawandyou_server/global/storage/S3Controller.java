@@ -1,21 +1,21 @@
-package com.drawandyou.drawandyou_server.image.presentation;
+package com.drawandyou.drawandyou_server.global.storage;
 
 import com.drawandyou.drawandyou_server.global.common.response.ApiResponse;
-import com.drawandyou.drawandyou_server.image.application.service.S3Service;
-import com.drawandyou.drawandyou_server.image.presentation.dto.request.PresignedUrlCreateRequest;
-import com.drawandyou.drawandyou_server.image.presentation.dto.response.PresignedUrlResponse;
-import com.drawandyou.drawandyou_server.image.presentation.message.ResponseMessage;
+import com.drawandyou.drawandyou_server.global.storage.application.service.S3Service;
+import com.drawandyou.drawandyou_server.global.storage.presentation.dto.request.PresignedUrlCreateRequest;
+import com.drawandyou.drawandyou_server.global.storage.presentation.dto.response.PresignedUrlResponse;
+import com.drawandyou.drawandyou_server.global.storage.presentation.message.ResponseMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "Image", description = "이미지 업로드 관련 API")
+@Tag(name = "S3", description = "S3 관련 API")
 @RestController
-@RequestMapping("/api/images")
+@RequestMapping("/api/s3")
 @RequiredArgsConstructor
-public class ImageController {
+public class S3Controller {
 
     private final S3Service s3Service;
 

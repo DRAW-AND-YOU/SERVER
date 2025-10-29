@@ -1,10 +1,10 @@
-package com.drawandyou.drawandyou_server.image.application.service;
+package com.drawandyou.drawandyou_server.global.storage.application.service;
 
 import com.drawandyou.drawandyou_server.global.config.S3Config;
-import com.drawandyou.drawandyou_server.image.application.service.enums.AllowedMimeType;
-import com.drawandyou.drawandyou_server.image.exception.MimeTypeNotJPGException;
-import com.drawandyou.drawandyou_server.image.presentation.dto.request.PresignedUrlCreateRequest;
-import com.drawandyou.drawandyou_server.image.presentation.dto.response.PresignedUrlResponse;
+import com.drawandyou.drawandyou_server.global.storage.application.service.enums.AllowedMimeType;
+import com.drawandyou.drawandyou_server.drawing.exception.MimeTypeNotJPGException;
+import com.drawandyou.drawandyou_server.global.storage.presentation.dto.request.PresignedUrlCreateRequest;
+import com.drawandyou.drawandyou_server.global.storage.presentation.dto.response.PresignedUrlResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

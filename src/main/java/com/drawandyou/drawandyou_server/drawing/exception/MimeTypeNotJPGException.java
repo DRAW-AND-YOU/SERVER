@@ -1,4 +1,4 @@
-package com.drawandyou.drawandyou_server.image.exception;
+package com.drawandyou.drawandyou_server.drawing.exception;
 
 import com.drawandyou.drawandyou_server.global.common.exception.CustomException;
 import org.springframework.http.HttpStatus;

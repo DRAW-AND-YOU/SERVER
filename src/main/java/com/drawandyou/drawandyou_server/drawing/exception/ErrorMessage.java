@@ -1,4 +1,4 @@
-package com.drawandyou.drawandyou_server.image.exception;
+package com.drawandyou.drawandyou_server.drawing.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
