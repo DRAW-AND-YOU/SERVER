@@ -2,8 +2,8 @@ package com.drawandyou.drawandyou_server.global.auth.presentation;
 
 import com.drawandyou.drawandyou_server.global.auth.presentation.dto.UserAuthDto;
 import com.drawandyou.drawandyou_server.global.common.response.ApiResponse;
-import com.drawandyou.drawandyou_server.user.application.service.UserService;
-import com.drawandyou.drawandyou_server.user.presentation.message.ResponseMessage;
+import com.drawandyou.drawandyou_server.domain.user.application.service.UserService;
+import com.drawandyou.drawandyou_server.domain.user.presentation.message.ResponseMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
