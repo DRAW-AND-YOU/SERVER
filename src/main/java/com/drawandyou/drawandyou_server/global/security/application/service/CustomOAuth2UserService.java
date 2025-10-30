@@ -2,8 +2,8 @@ package com.drawandyou.drawandyou_server.global.security.application.service;
 
 import com.drawandyou.drawandyou_server.global.security.application.dto.OAuthAttributes;
 import com.drawandyou.drawandyou_server.global.security.vo.CustomUser;
-import com.drawandyou.drawandyou_server.user.domain.entity.User;
-import com.drawandyou.drawandyou_server.user.domain.repository.UserRepository;
+import com.drawandyou.drawandyou_server.domain.user.domain.entity.User;
+import com.drawandyou.drawandyou_server.domain.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

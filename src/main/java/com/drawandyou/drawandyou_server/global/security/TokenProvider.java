@@ -1,7 +1,7 @@
 package com.drawandyou.drawandyou_server.global.security;
 
 import com.drawandyou.drawandyou_server.global.security.vo.CustomUser;
-import com.drawandyou.drawandyou_server.user.domain.entity.User;
+import com.drawandyou.drawandyou_server.domain.user.domain.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
