@@ -7,7 +7,10 @@ public class AllowedMimeType {
     }
 
     public static final Set<String> ALLOWED_MIME_TYPES = Set.of(
-            "image/png"
+            "image/jpg",
+            "image/jpeg",
+            "image/png",
+            "image/webp"
     );
 
 }

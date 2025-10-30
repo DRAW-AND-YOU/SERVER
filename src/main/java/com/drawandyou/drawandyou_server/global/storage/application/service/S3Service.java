@@ -54,6 +54,6 @@ public class S3Service {
             throw new InvalidMimeTypeException();
         }
         int slashIndex = mimeType.lastIndexOf('/');
-        return mimeType.substring(slashIndex + 1); // "png"
+        return mimeType.substring(slashIndex + 1);
     }
 }
