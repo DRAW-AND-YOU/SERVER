@@ -40,5 +40,6 @@ public class TherapyProgram extends BaseEntity {
     private Integer currentDay;
 
     // 치유 프로그램의 전체 일수 (7일로 고정이긴하다.)
+    @Builder.Default
     private Integer totalDays = 7;
 }
