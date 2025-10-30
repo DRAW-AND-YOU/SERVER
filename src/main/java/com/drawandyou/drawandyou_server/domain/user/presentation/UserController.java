@@ -1,5 +1,6 @@
 package com.drawandyou.drawandyou_server.domain.user.presentation;
 
+import com.drawandyou.drawandyou_server.domain.user.presentation.dto.response.CheckUserNameResponse;
 import com.drawandyou.drawandyou_server.global.common.response.ApiResponse;
 import com.drawandyou.drawandyou_server.domain.user.application.service.UserService;
 import com.drawandyou.drawandyou_server.domain.user.presentation.dto.request.LoginRequest;
@@ -10,14 +11,12 @@ import com.drawandyou.drawandyou_server.domain.user.presentation.dto.response.Re
 import com.drawandyou.drawandyou_server.domain.user.presentation.message.ResponseMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "User", description = "사용자 관련 API")
 @RestController
@@ -62,4 +61,28 @@ public class UserController {
         CurrentLoginUserResponse response = userService.getUserById(userId);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.USER_INFO_SUCCESS.getMessage(), response);
     }
+
+    @Operation(summary = "로그아웃")
+    @PostMapping("/logout")
+    public ApiResponse<Void> logout(HttpServletResponse response) {
+
+        Cookie cookie = new Cookie("accessToken", null);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+
+        response.addCookie(cookie);
+
+        return ApiResponse.success(HttpStatus.OK, ResponseMessage.USER_LOGOUT_SUCCESS.getMessage());
+    }
+
+    @Operation(summary = "회원가입시 중복 ID 검증")
+    @GetMapping("/check-username")
+    public ApiResponse<CheckUserNameResponse> checkUserNameExists(@RequestParam String username){
+        CheckUserNameResponse isAvailable = userService.checkUsernameAvailable(username);
+        return ApiResponse.success(HttpStatus.OK, ResponseMessage.USER_NAME_AVAILABLE_CHECK_SUCCESS.getMessage(), isAvailable);
+
+    }
+
 }

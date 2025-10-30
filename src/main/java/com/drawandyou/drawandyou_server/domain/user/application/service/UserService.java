@@ -1,5 +1,6 @@
 package com.drawandyou.drawandyou_server.domain.user.application.service;
 
+import com.drawandyou.drawandyou_server.domain.user.presentation.dto.response.CheckUserNameResponse;
 import com.drawandyou.drawandyou_server.global.auth.presentation.dto.UserAuthDto;
 import com.drawandyou.drawandyou_server.global.security.TokenProvider;
 import com.drawandyou.drawandyou_server.domain.user.domain.entity.User;
@@ -114,5 +115,10 @@ public class UserService {
                 .username(user.getUsername())
                 .token(token)
                 .build();
+    }
+
+    public CheckUserNameResponse checkUsernameAvailable(String username) {
+        Boolean isExists = userRepository.existsByUsername(username);
+        return new CheckUserNameResponse(!isExists);
     }
 }
