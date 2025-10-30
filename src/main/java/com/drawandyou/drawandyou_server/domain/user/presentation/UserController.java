@@ -79,7 +79,7 @@ public class UserController {
 
     @Operation(summary = "회원가입시 중복 ID 검증")
     @GetMapping("/check-username")
-    public ApiResponse<CheckUserNameResponse> checkUserNameExists(@RequestParam String username){
+    public ApiResponse<CheckUserNameResponse> checkUserNameAvailable(@RequestParam String username){
         CheckUserNameResponse isAvailable = userService.checkUsernameAvailable(username);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.USER_NAME_AVAILABLE_CHECK_SUCCESS.getMessage(), isAvailable);
 
