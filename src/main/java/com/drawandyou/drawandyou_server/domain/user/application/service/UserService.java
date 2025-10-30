@@ -12,8 +12,6 @@ import com.drawandyou.drawandyou_server.domain.user.presentation.dto.request.Reg
 import com.drawandyou.drawandyou_server.domain.user.presentation.dto.response.CurrentLoginUserResponse;
 import com.drawandyou.drawandyou_server.domain.user.presentation.dto.response.LoginResponse;
 import com.drawandyou.drawandyou_server.domain.user.presentation.dto.response.RegisterResponse;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -122,16 +120,5 @@ public class UserService {
     public CheckUserNameResponse checkUsernameAvailable(String username) {
         Boolean isExists = userRepository.existsByUsername(username);
         return new CheckUserNameResponse(!isExists);
-    }
-
-    public void logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("accessToken", null);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setDomain(".drawandyou.com");
-
-        response.addCookie(cookie);
     }
 }
