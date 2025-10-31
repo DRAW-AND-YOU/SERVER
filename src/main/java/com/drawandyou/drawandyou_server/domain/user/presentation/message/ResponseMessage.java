@@ -13,7 +13,8 @@ public enum ResponseMessage {
     USER_INFO_SUCCESS("사용자 정보 조회에 성공했습니다"),
     TOKEN_ISSUE_SUCCESS("JWT 토큰 발급에 성공했습니다"),
     USER_LOGOUT_SUCCESS("로그아웃에 성공했습니다."),
-    USER_NAME_AVAILABLE_CHECK_SUCCESS("유저 ID 중복 확인에 성공했습니다");
+    USER_NAME_AVAILABLE_CHECK_SUCCESS("유저 ID 중복 확인에 성공했습니다"),
+    USER_MY_PAGE_GET_SUCCESS("마이페이지 조회에 성공했습니다");
 
     private final String message;
 }

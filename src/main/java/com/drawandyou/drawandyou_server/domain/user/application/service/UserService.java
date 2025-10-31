@@ -1,6 +1,6 @@
 package com.drawandyou.drawandyou_server.domain.user.application.service;
 
-import com.drawandyou.drawandyou_server.domain.user.presentation.dto.response.CheckUserNameResponse;
+import com.drawandyou.drawandyou_server.domain.user.presentation.dto.response.*;
 import com.drawandyou.drawandyou_server.global.auth.presentation.dto.UserAuthDto;
 import com.drawandyou.drawandyou_server.global.security.TokenProvider;
 import com.drawandyou.drawandyou_server.domain.user.domain.entity.User;
@@ -9,24 +9,27 @@ import com.drawandyou.drawandyou_server.domain.user.exception.InvalidPasswordExc
 import com.drawandyou.drawandyou_server.domain.user.exception.UserAlreadyExistsException;
 import com.drawandyou.drawandyou_server.domain.user.exception.UserNotFoundException;
 import com.drawandyou.drawandyou_server.domain.user.presentation.dto.request.RegisterRequest;
-import com.drawandyou.drawandyou_server.domain.user.presentation.dto.response.CurrentLoginUserResponse;
-import com.drawandyou.drawandyou_server.domain.user.presentation.dto.response.LoginResponse;
-import com.drawandyou.drawandyou_server.domain.user.presentation.dto.response.RegisterResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserService {
+
+    private final UserFindService userFindService;
 
     private final UserRepository userRepository;
     private final TokenProvider tokenProvider;
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    @Transactional
     public RegisterResponse registerUser(RegisterRequest registerRequestDto) {
 
         if (registerRequestDto == null || registerRequestDto.password() == null) {
@@ -34,8 +37,13 @@ public class UserService {
         }
 
         User user = User.builder()
-                .username(registerRequestDto.username())
+                .email(registerRequestDto.email())
                 .password(passwordEncoder.encode(registerRequestDto.password()))
+                .username(registerRequestDto.username())
+                .nickname(registerRequestDto.nickname())
+                .birthDate(registerRequestDto.birthDate())
+                .gender(registerRequestDto.gender())
+                .hobbies(registerRequestDto.hobbies())
                 .build();
 
         User registeredUser = create(user);
@@ -46,19 +54,20 @@ public class UserService {
                 .build();
     }
 
+    @Transactional
     public User create(final User userEntity) {
-        String username = userEntity.getUsername();
+        String getEmail = userEntity.getEmail();
 
-        // 같은 사용자명 존재 확인
-        if (userRepository.existsByUsername(username)) {
+        // 같은 이메일 존재 확인
+        if (userRepository.existsByEmail(getEmail)) {
             throw new UserAlreadyExistsException();
         }
         return userRepository.save(userEntity);
     }
 
-    // username, password 비교하여 사용자 반환
-    public User getByCredentials(final String username, final String password, final PasswordEncoder encoder) {
-        User originalUser = userRepository.findOptionalByUsername(username)
+    // email, password 비교하여 사용자 반환
+    public User getByCredentials(final String email, final String password, final PasswordEncoder encoder) {
+        User originalUser = userRepository.findOptionalByEmail(email)
                 .orElseThrow(UserNotFoundException::new);
 
         if (!encoder.matches(password, originalUser.getPassword())) {
@@ -69,9 +78,9 @@ public class UserService {
     }
 
 
-    public LoginResponse signIn(String username, String password) {
+    public LoginResponse signIn(String email, String password) {
 
-        User user = getByCredentials(username, password, passwordEncoder);
+        User user = getByCredentials(email, password, passwordEncoder);
         // 인증 성공시 jwt 토큰 발급
         final String token = tokenProvider.create(user);
 
@@ -89,12 +98,11 @@ public class UserService {
      * @return UserAuthDto (비밀번호 제외)
      */
     public CurrentLoginUserResponse getUserById(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(UserNotFoundException::new);
+        User user = userFindService.findUser(userId);
 
         return CurrentLoginUserResponse.builder()
                 .userId(user.getId())
-                .username(user.getUsername())
+                .nickname(user.getNickname())
                 .build();
     }
 
@@ -104,8 +112,7 @@ public class UserService {
      * @return UserAuthDto (사용자 정보 + JWT 토큰)
      */
     public UserAuthDto issueTokenByUserId(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(UserNotFoundException::new);
+        User user = userFindService.findUser(userId);
 
         // 사용자 ID 기반으로 JWT 토큰 생성
         final String token = tokenProvider.createByUserId(userId);
@@ -117,8 +124,14 @@ public class UserService {
                 .build();
     }
 
-    public CheckUserNameResponse checkUsernameAvailable(String username) {
-        Boolean isExists = userRepository.existsByUsername(username);
+    public CheckUserNameResponse checkUsernameAvailable(String email) {
+        Boolean isExists = userRepository.existsByEmail(email);
         return new CheckUserNameResponse(!isExists);
+    }
+
+    public UserMyPageResponse getUserMyPage(Long userId) {
+        User user = userFindService.findUser(userId);
+        Hibernate.initialize(user.getHobbies());
+        return UserMyPageResponse.toMyPageResponse(user);
     }
 }

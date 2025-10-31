@@ -1,13 +1,10 @@
 package com.drawandyou.drawandyou_server.domain.user.presentation;
 
-import com.drawandyou.drawandyou_server.domain.user.presentation.dto.response.CheckUserNameResponse;
+import com.drawandyou.drawandyou_server.domain.user.presentation.dto.response.*;
 import com.drawandyou.drawandyou_server.global.common.response.ApiResponse;
 import com.drawandyou.drawandyou_server.domain.user.application.service.UserService;
 import com.drawandyou.drawandyou_server.domain.user.presentation.dto.request.LoginRequest;
 import com.drawandyou.drawandyou_server.domain.user.presentation.dto.request.RegisterRequest;
-import com.drawandyou.drawandyou_server.domain.user.presentation.dto.response.CurrentLoginUserResponse;
-import com.drawandyou.drawandyou_server.domain.user.presentation.dto.response.LoginResponse;
-import com.drawandyou.drawandyou_server.domain.user.presentation.dto.response.RegisterResponse;
 import com.drawandyou.drawandyou_server.domain.user.presentation.message.ResponseMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -82,7 +79,14 @@ public class UserController {
     public ApiResponse<CheckUserNameResponse> checkUserNameAvailable(@RequestParam String username){
         CheckUserNameResponse isAvailable = userService.checkUsernameAvailable(username);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.USER_NAME_AVAILABLE_CHECK_SUCCESS.getMessage(), isAvailable);
-
     }
+
+    @Operation(summary = "마이페이지 조회")
+    @GetMapping("/mypage")
+    public ApiResponse<UserMyPageResponse> getUserMyPage(@AuthenticationPrincipal Long userId){
+        UserMyPageResponse response  = userService.getUserMyPage(userId);
+        return ApiResponse.success(HttpStatus.OK, ResponseMessage.USER_MY_PAGE_GET_SUCCESS.getMessage(), response);
+    }
+
 
 }
