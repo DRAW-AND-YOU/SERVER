@@ -18,6 +18,7 @@ public class TherapyProgram extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "therapy_program_id")
     private Long id;
 
     // 치유 프로그램을 진행중인 유저

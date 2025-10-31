@@ -21,6 +21,7 @@ public class DailyCourse extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "daily_course_id")
     private Long id;
 
     // 데일리 코스와 관련있는 치유 프로그램

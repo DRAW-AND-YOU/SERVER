@@ -18,6 +18,7 @@ public class Drawing extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "drawing_id")
     private Long id;
 
     @ManyToOne(fetch = LAZY)

@@ -15,6 +15,7 @@ public class DrawingAnalysis {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "drawing_analysis_id")
     private Long id;
 
     @OneToOne(fetch = LAZY)
