@@ -35,7 +35,7 @@ public class TherapyProgram extends BaseEntity {
     // 치유 프로그램 종료 여부(유저가 치유 프로그램의 코스를 모두 진행하면 완료처리)
     private boolean isFinished;
 
-    // 치유 프로그램의 전체 일수 (7일로 고정이긴하다.)
+    // 치유 프로그램의 전체 일수
     @Builder.Default
     private Integer totalDays = 5;
 }
