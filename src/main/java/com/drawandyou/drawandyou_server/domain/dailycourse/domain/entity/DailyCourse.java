@@ -1,6 +1,5 @@
 package com.drawandyou.drawandyou_server.domain.dailycourse.domain.entity;
 
-import com.drawandyou.drawandyou_server.domain.dailycourse.domain.entity.enums.CourseStatus;
 import com.drawandyou.drawandyou_server.domain.dailycourse.domain.entity.enums.CourseType;
 import com.drawandyou.drawandyou_server.domain.drawing.domain.entity.Drawing;
 import com.drawandyou.drawandyou_server.global.entity.BaseEntity;
