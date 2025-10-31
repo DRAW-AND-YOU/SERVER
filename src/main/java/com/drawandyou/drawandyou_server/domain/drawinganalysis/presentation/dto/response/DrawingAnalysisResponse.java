@@ -1,4 +1,4 @@
-package com.drawandyou.drawandyou_server.domain.drawing.presentation.dto.response;
+package com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.response;
 
 public record DrawingAnalysisResponse(
         String analysisResult

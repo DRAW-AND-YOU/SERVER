@@ -1,6 +1,5 @@
 package com.drawandyou.drawandyou_server.domain.dailycourse.domain.entity;
 
-import com.drawandyou.drawandyou_server.domain.dailycourse.domain.entity.enums.CourseStatus;
 import com.drawandyou.drawandyou_server.domain.dailycourse.domain.entity.enums.CourseType;
 import com.drawandyou.drawandyou_server.domain.drawing.domain.entity.Drawing;
 import com.drawandyou.drawandyou_server.global.entity.BaseEntity;
@@ -21,6 +20,7 @@ public class DailyCourse extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "daily_course_id")
     private Long id;
 
     // 데일리 코스와 관련있는 치유 프로그램
@@ -39,9 +39,6 @@ public class DailyCourse extends BaseEntity {
     // 데일리 코스 설명(지시사항) - "어떻게 그려주세요~~"
     private String description;
 
-    // 코스 완료 시간
-    private LocalDateTime completedAt;
-
     // 코스가 며칠차 코스인지
     // ex) HTP 테스트라면 1일차겠지.
     private Integer currentDay;
@@ -50,8 +47,7 @@ public class DailyCourse extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private CourseType courseType;
 
-    // 코스의 진행 상태(시작 안함, 진행중, 완료)
-    @Enumerated(value = EnumType.STRING)
-    private CourseStatus courseStatus;
+    // 코스 완료 여부
+    private boolean isCompleted;
 
 }
