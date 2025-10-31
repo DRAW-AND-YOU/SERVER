@@ -1,9 +1,6 @@
 package com.drawandyou.drawandyou_server.domain.user.presentation.dto.response;
 
 import com.drawandyou.drawandyou_server.domain.user.domain.entity.User;
-import com.nimbusds.jose.crypto.PasswordBasedDecrypter;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
 import java.time.LocalDate;
 import java.util.List;
 
