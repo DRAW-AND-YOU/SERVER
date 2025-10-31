@@ -83,7 +83,7 @@ public class UserController {
 
     @Operation(summary = "마이페이지 조회")
     @GetMapping("/mypage")
-    public ApiResponse<UserMyPageResponse> checkUserNameAvailable(@AuthenticationPrincipal Long userId){
+    public ApiResponse<UserMyPageResponse> getUserMyPage(@AuthenticationPrincipal Long userId){
         UserMyPageResponse response  = userService.getUserMyPage(userId);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.USER_MY_PAGE_GET_SUCCESS.getMessage(), response);
     }

@@ -22,7 +22,7 @@ public record UserMyPageResponse(
                 user.getEmail(),
                 user.getBirthDate(),
                 user.getGender().getDisplayName(),
-                user.getHobbies()
+                user.getHobbies() != null? user.getHobbies() : List.of()
         );
     }
 

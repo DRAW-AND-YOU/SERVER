@@ -124,8 +124,8 @@ public class UserService {
                 .build();
     }
 
-    public CheckUserNameResponse checkUsernameAvailable(String username) {
-        Boolean isExists = userRepository.existsByEmail(username);
+    public CheckUserNameResponse checkUsernameAvailable(String email) {
+        Boolean isExists = userRepository.existsByEmail(email);
         return new CheckUserNameResponse(!isExists);
     }
 
