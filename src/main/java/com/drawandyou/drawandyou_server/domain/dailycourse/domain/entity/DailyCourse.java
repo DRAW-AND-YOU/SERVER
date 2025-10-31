@@ -39,9 +39,6 @@ public class DailyCourse extends BaseEntity {
     // 데일리 코스 설명(지시사항) - "어떻게 그려주세요~~"
     private String description;
 
-    // 코스 완료 시간
-    private LocalDateTime completedAt;
-
     // 코스가 며칠차 코스인지
     // ex) HTP 테스트라면 1일차겠지.
     private Integer currentDay;
