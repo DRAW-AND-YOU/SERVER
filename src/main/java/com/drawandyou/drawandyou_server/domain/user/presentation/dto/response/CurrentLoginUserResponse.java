@@ -5,6 +5,6 @@ import lombok.Builder;
 @Builder
 public record CurrentLoginUserResponse(
         Long userId,
-        String username
+        String nickname
 ) {
 }

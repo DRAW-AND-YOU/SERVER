@@ -5,6 +5,7 @@ import com.drawandyou.drawandyou_server.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -21,6 +22,8 @@ public class User extends BaseEntity {
 
     private String username; // 유저의 이름
 
+    private String nickname;
+
     private String email; // 이메일
 
     private String password; // 비밀번호
@@ -30,6 +33,8 @@ public class User extends BaseEntity {
     private String authProvider;
 
     private String profileImageUrl;
+
+    private LocalDate birthDate; // 생년월일
 
     @Enumerated(value = EnumType.STRING)
     private Gender gender; // 성별
