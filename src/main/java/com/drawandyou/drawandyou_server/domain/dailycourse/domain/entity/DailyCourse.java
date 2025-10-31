@@ -50,8 +50,7 @@ public class DailyCourse extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private CourseType courseType;
 
-    // 코스의 진행 상태(시작 안함, 진행중, 완료)
-    @Enumerated(value = EnumType.STRING)
-    private CourseStatus courseStatus;
+    // 코스 완료 여부
+    private boolean isCompleted;
 
 }
