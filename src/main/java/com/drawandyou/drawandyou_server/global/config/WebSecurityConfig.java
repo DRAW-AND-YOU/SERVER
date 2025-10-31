@@ -60,6 +60,7 @@ public class WebSecurityConfig {
                         // Public endpoints (인증 불필요)
                         .requestMatchers(
                                 "/",
+                                "/api/test/**",
                                 "/api/auth/**",
                                 "/api/user/signup",
                                 "/api/user/signin",
