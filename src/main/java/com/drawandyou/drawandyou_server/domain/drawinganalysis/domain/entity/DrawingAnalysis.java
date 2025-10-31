@@ -26,12 +26,15 @@ public class DrawingAnalysis {
     private int score;
 
     // 색상 분석 결과
+    @Column(columnDefinition = "TEXT")
     private String colorAnalysis;
 
     // 구도 분석 결과
+    @Column(columnDefinition = "TEXT")
     private String compositionAnalysis;
 
     // 선 분석 결과
+    @Column(columnDefinition = "TEXT")
     private String lineAnalysis;
 
     // 감정 상태
