@@ -27,6 +27,24 @@ public class FastApiClient {
                 .doOnError(error -> log.error("FastAPI 호출 실패", error));
     }
 
+    public Mono<String> searchPlacesByKeyword(String query){
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/test/kakao/search/keyword")
+                        .queryParam("query", query)
+                        .build())
+                .retrieve()
+                .bodyToMono(String.class)
+                    .doOnSuccess(response -> log.info("Kakao Place Search 응답 성공 (keyword: {}): {}", query, response))
+                .doOnError(error -> log.error("Kakao Place Search 호출 실패 (keyword: {})", query, error));
+    }
+
+    public String searchPlacesByKeywordSync(String keyword){
+        return searchPlacesByKeyword(keyword).block();
+    }
+
+
+
     /**
      * FastAPI의 /test/spotifymcp/tools 엔드포인트를 동기적으로 호출합니다.
      *

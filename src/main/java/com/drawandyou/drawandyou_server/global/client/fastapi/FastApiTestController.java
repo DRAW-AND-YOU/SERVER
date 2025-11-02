@@ -7,11 +7,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "FastAPI 테스트", description = "FastAPI 연결 테스트 API")
 @RestController
-@RequestMapping("/api/test/fastapi")
+@RequestMapping("/api/fastapi")
 @RequiredArgsConstructor
 public class FastApiTestController {
 
@@ -34,4 +35,15 @@ public class FastApiTestController {
             return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "FastAPI 연결 실패: " + e.getMessage(), null);
         }
     }
+
+    @Operation(summary = "키워드 기반 장소 검색", description = "FastAPI의 /test/kakao/search/keyword 엔드포인트를 호출합니다.")
+    @GetMapping("/places")
+    public ApiResponse<String> searchPlacesByKeyword(@RequestParam String keyword) {
+        String result = fastApiClient.searchPlacesByKeywordSync(keyword);
+        return ApiResponse.success(HttpStatus.OK, "키워드 기반 장소 검색에 성공하였습니다.", result);
+    }
+
+
+
+
 }
