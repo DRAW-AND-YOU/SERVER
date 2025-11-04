@@ -152,7 +152,7 @@ public class UserService {
         User user = userFindService.findUser(userId);
 
         // 소셜 로그인 유저가 아니라면 예외를 던진다.
-        if (!user.getAuthProvider().equals("google")){
+        if (user.getAuthProvider() == null || user.getAuthProvider().isEmpty()){
             throw new NotSocialLoginUserException();
         }
         // nickname, birthdate, gender, hobbies
