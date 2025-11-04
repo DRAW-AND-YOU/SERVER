@@ -1,6 +1,7 @@
 package com.drawandyou.drawandyou_server.domain.user.domain.entity;
 
 import com.drawandyou.drawandyou_server.domain.user.domain.entity.enums.Gender;
+import com.drawandyou.drawandyou_server.domain.user.domain.entity.enums.Hobby;
 import com.drawandyou.drawandyou_server.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -44,6 +45,33 @@ public class User extends BaseEntity {
             name = "user_hobbies",
             joinColumns = @JoinColumn(name = "user_id")
     )
-    private List<String> hobbies; // 유저의 관심사 목록
+    @Enumerated(value = EnumType.STRING)
+    private List<Hobby> hobbies; // 유저의 관심사 목록
+
+    public void assignNickname(String nickname){
+        this.nickname = nickname;
+    }
+
+    public void assignBirthDate(LocalDate birthDate){
+        this.birthDate = birthDate;
+    }
+
+    public void assignGender(Gender gender){
+        this.gender = gender;
+    }
+
+    public void assignHobbies(List<Hobby> hobbies){
+        this.hobbies = hobbies;
+    }
+
+    public void changeProfileImage(String profileImageUrl){
+        this.profileImageUrl = profileImageUrl;
+    }
+
+    public void changePassword(String newPassword){
+        this.password = newPassword;
+    }
+
+
 
 }
