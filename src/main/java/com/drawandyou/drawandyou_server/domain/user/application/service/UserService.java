@@ -1,14 +1,12 @@
 package com.drawandyou.drawandyou_server.domain.user.application.service;
 
+import com.drawandyou.drawandyou_server.domain.user.exception.*;
+import com.drawandyou.drawandyou_server.domain.user.presentation.dto.request.*;
 import com.drawandyou.drawandyou_server.domain.user.presentation.dto.response.*;
 import com.drawandyou.drawandyou_server.global.auth.presentation.dto.UserAuthDto;
 import com.drawandyou.drawandyou_server.global.security.TokenProvider;
 import com.drawandyou.drawandyou_server.domain.user.domain.entity.User;
 import com.drawandyou.drawandyou_server.domain.user.domain.repository.UserRepository;
-import com.drawandyou.drawandyou_server.domain.user.exception.InvalidPasswordException;
-import com.drawandyou.drawandyou_server.domain.user.exception.UserAlreadyExistsException;
-import com.drawandyou.drawandyou_server.domain.user.exception.UserNotFoundException;
-import com.drawandyou.drawandyou_server.domain.user.presentation.dto.request.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
@@ -100,10 +98,23 @@ public class UserService {
     public CurrentLoginUserResponse getUserById(Long userId) {
         User user = userFindService.findUser(userId);
 
+        boolean isSocialUser = user.getAuthProvider() != null;
+        boolean isRegisterCompleted = checkRegisterCompleteStatusOfUser(user);
+
+
         return CurrentLoginUserResponse.builder()
                 .userId(user.getId())
+                .username(user.getUsername())
                 .nickname(user.getNickname())
+                .isSocialUser(isSocialUser)
+                .isRegisterCompleted(isRegisterCompleted)
                 .build();
+    }
+
+    private boolean checkRegisterCompleteStatusOfUser(User user) {
+        // 이름, 닉네임, 생년월일, 성별 정보가 입력되어 있으면  Complete 한 것으로 판단
+        return user.getUsername() != null && user.getNickname() != null
+                && user.getBirthDate() != null && user.getGender() != null;
     }
 
     /**
@@ -131,6 +142,54 @@ public class UserService {
 
     public UserMyPageResponse getUserMyPage(Long userId) {
         User user = userFindService.findUser(userId);
+        Hibernate.initialize(user.getHobbies());
+        return UserMyPageResponse.toMyPageResponse(user);
+    }
+
+
+    @Transactional
+    public void processExtraSignUpForSocialLoginUser(Long userId, ExtraRegisterRequest extraRegisterRequest) {
+        User user = userFindService.findUser(userId);
+
+        // 소셜 로그인 유저가 아니라면 예외를 던진다.
+        if (user.getAuthProvider() == null || user.getAuthProvider().isEmpty()){
+            throw new NotSocialLoginUserException();
+        }
+        // nickname, birthdate, gender, hobbies
+        user.assignNickname(extraRegisterRequest.nickname());
+        user.assignBirthDate(extraRegisterRequest.birthDate());
+        user.assignGender(extraRegisterRequest.gender());
+        user.assignHobbies(extraRegisterRequest.hobbies());
+    }
+
+    @Transactional
+    public UserMyPageResponse changeProfileImageUrlForUser(Long userId, ProfileImageChangeRequest profileImageChangeRequest) {
+        User user = userFindService.findUser(userId);
+        user.changeProfileImage(profileImageChangeRequest.profileImageUrl());
+
+        Hibernate.initialize(user.getHobbies());
+        return UserMyPageResponse.toMyPageResponse(user);
+    }
+
+    @Transactional
+    public UserMyPageResponse changePasswordForUser(Long userId, PasswordChangeRequest passwordChangeRequest) {
+        User user = userFindService.findUser(userId);
+
+        boolean passwordMatches = passwordEncoder.matches(passwordChangeRequest.currentPassword(), user.getPassword());
+        // request 로 전달받은 비밀번호와 db 의 비밀번호가 일치하지 않으면 예외 발생
+        if (!passwordMatches) throw new CanNotModifyPasswordException();
+
+        String newPassword = passwordEncoder.encode(passwordChangeRequest.newPassword());
+        user.changePassword(newPassword);
+
+        Hibernate.initialize(user.getHobbies());
+        return UserMyPageResponse.toMyPageResponse(user);
+    }
+
+    @Transactional
+    public UserMyPageResponse changeHobbiesForUser(Long userId, HobbiesChangeRequest hobbiesChangeRequest) {
+        User user = userFindService.findUser(userId);
+        user.assignHobbies(hobbiesChangeRequest.hobbies());
         Hibernate.initialize(user.getHobbies());
         return UserMyPageResponse.toMyPageResponse(user);
     }

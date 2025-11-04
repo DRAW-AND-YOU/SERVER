@@ -1,15 +1,15 @@
 package com.drawandyou.drawandyou_server.domain.user.presentation;
 
+import com.drawandyou.drawandyou_server.domain.user.presentation.dto.request.*;
 import com.drawandyou.drawandyou_server.domain.user.presentation.dto.response.*;
 import com.drawandyou.drawandyou_server.global.common.response.ApiResponse;
 import com.drawandyou.drawandyou_server.domain.user.application.service.UserService;
-import com.drawandyou.drawandyou_server.domain.user.presentation.dto.request.LoginRequest;
-import com.drawandyou.drawandyou_server.domain.user.presentation.dto.request.RegisterRequest;
 import com.drawandyou.drawandyou_server.domain.user.presentation.message.ResponseMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,7 +27,7 @@ public class UserController {
      */
     @Operation(summary = "일반 회원가입")
     @PostMapping("/signup")
-    public ApiResponse<RegisterResponse> registerUser(@RequestBody RegisterRequest registerRequest) {
+    public ApiResponse<RegisterResponse> registerUser(@RequestBody @Valid RegisterRequest registerRequest) {
 
         RegisterResponse response = userService.registerUser(registerRequest);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.USER_SIGNUP_SUCCESS.getMessage(), response);
@@ -87,6 +87,47 @@ public class UserController {
         UserMyPageResponse response  = userService.getUserMyPage(userId);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.USER_MY_PAGE_GET_SUCCESS.getMessage(), response);
     }
+
+    @Operation(summary = "소셜 로그인 유저 추가 회원가입")
+    @PostMapping("/signup/extra")
+    public ApiResponse<Void> processExtraSignUpForSocialLoginUser(
+            @AuthenticationPrincipal Long userId,
+            @RequestBody @Valid ExtraRegisterRequest extraRegisterRequest){
+        userService.processExtraSignUpForSocialLoginUser(userId, extraRegisterRequest);
+        return ApiResponse.success(HttpStatus.OK, ResponseMessage.SOCIAL_LOGIN_USER_EXTRA_SIGN_UP_SUCCESS.getMessage());
+    }
+
+    @Operation(summary = "마이페이지 - 프로필 이미지 변경")
+    @PatchMapping("/mypage/profileImage")
+    public ApiResponse<UserMyPageResponse> changeProfileImageInMyPage(
+            @AuthenticationPrincipal Long userId,
+            @RequestBody @Valid ProfileImageChangeRequest profileImageChangeRequest
+            ){
+
+        UserMyPageResponse response = userService.changeProfileImageUrlForUser(userId, profileImageChangeRequest);
+        return ApiResponse.success(HttpStatus.OK, ResponseMessage.USER_PROFILE_IMAGE_CHANGE_SUCCESS.getMessage(), response);
+    }
+
+    @Operation(summary = "마이페이지 - 비밀번호 변경")
+    @PatchMapping("/mypage/password")
+    public ApiResponse<UserMyPageResponse> changePasswordInMyPage(
+            @AuthenticationPrincipal Long userId,
+            @RequestBody @Valid PasswordChangeRequest passwordChangeRequest
+    ){
+        UserMyPageResponse response = userService.changePasswordForUser(userId, passwordChangeRequest);
+        return ApiResponse.success(HttpStatus.OK, ResponseMessage.USER_PASSWORD_CHANGE_SUCCESS.getMessage(), response);
+    }
+
+    @Operation(summary = "마이페이지 - 관심사 변경")
+    @PatchMapping("/mypage/hobbies")
+    public ApiResponse<UserMyPageResponse> changeHobbiesInMyPage(
+            @AuthenticationPrincipal Long userId,
+            @RequestBody @Valid HobbiesChangeRequest hobbiesChangeRequest
+    ){
+        UserMyPageResponse response = userService.changeHobbiesForUser(userId, hobbiesChangeRequest);
+        return ApiResponse.success(HttpStatus.OK, ResponseMessage.USER_HOBBIES_CHANGE_SUCCESS.getMessage(), response);
+    }
+
 
 
 }
