@@ -8,7 +8,8 @@ import lombok.RequiredArgsConstructor;
 public enum ResponseMessage {
 
     DRAWING_ANALYSIS_SUCCESS("AI 그림 분석에 성공했습니다."),
-    DRAWING_ANALYSIS_DETAIL_GET_SUCCESS("그림 분석 상세조회에 성공했습니다.");
+    DRAWING_ANALYSIS_DETAIL_GET_SUCCESS("그림 분석 상세조회에 성공했습니다."),
+    DRAWING_ANALYSIS_LIST_GET_SUCCESS("그림 분석 리스트 조회에 성공했습니다.");
 
     private final String message;
 }
