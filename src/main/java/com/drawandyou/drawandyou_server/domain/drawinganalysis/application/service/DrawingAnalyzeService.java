@@ -3,6 +3,9 @@ package com.drawandyou.drawandyou_server.domain.drawinganalysis.application.serv
 import com.drawandyou.drawandyou_server.domain.drawing.application.service.DrawingSaveService;
 import com.drawandyou.drawandyou_server.domain.drawing.domain.entity.Drawing;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.domain.entity.DrawingAnalysis;
+import com.drawandyou.drawandyou_server.domain.drawinganalysis.domain.vo.MusicRecommendationValue;
+import com.drawandyou.drawandyou_server.domain.drawinganalysis.domain.vo.PlaceRecommendationValue;
+import com.drawandyou.drawandyou_server.domain.drawinganalysis.domain.vo.VideoRecommendationValue;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.DetailedScores;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.request.ContentRecommendRequest;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.request.DrawingAnalysisRequest;
@@ -15,6 +18,8 @@ import com.drawandyou.drawandyou_server.global.client.fastapi.FastApiClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -54,9 +59,6 @@ public class DrawingAnalyzeService {
                 drawingAnalysisResponse.detailedScores().questionScore()
         );
 
-        // 분석 결과 저장
-        drawingAnalysisSaveService.save(drawingAnalysis);
-
         // ContentRecommendRequest 생성 (drawingAnalysisResponse로부터 데이터 가져옴)
         ContentRecommendRequest contentRecommendRequest = new ContentRecommendRequest(
                 drawingAnalysisResponse.totalScore(),
@@ -68,6 +70,25 @@ public class DrawingAnalyzeService {
         // fast api 컨텐츠 추천 api 호출
         ContentRecommendationResponse contentRecommendationResponse =
                 fastApiClient.getContentRecommendationsSync(contentRecommendRequest);
+
+        // 추천 결과를 Value Object로 변환
+        List<MusicRecommendationValue> musicRecommendations = contentRecommendationResponse.music().stream()
+                .map(m -> new MusicRecommendationValue(m.title(), m.artist(), m.url(), m.image()))
+                .toList();
+
+        List<VideoRecommendationValue> videoRecommendations = contentRecommendationResponse.video().stream()
+                .map(v -> new VideoRecommendationValue(v.title(), v.url(), v.thumbnail()))
+                .toList();
+
+        List<PlaceRecommendationValue> placeRecommendations = contentRecommendationResponse.place().stream()
+                .map(p -> new PlaceRecommendationValue(p.title(), p.address(), p.url(), p.rating(), p.image()))
+                .toList();
+
+        // DrawingAnalysis에 추천 결과 추가
+        drawingAnalysis.addRecommendations(musicRecommendations, videoRecommendations, placeRecommendations);
+
+        // 분석 결과 저장 (추천 결과 포함)
+        drawingAnalysisSaveService.save(drawingAnalysis);
 
         // 최종 응답 생성
         return DrawingAnalysisAndRecommendationResponse.toResponse(
