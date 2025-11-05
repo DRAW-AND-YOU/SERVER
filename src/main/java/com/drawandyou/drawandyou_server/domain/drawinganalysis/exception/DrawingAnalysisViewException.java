@@ -5,6 +5,6 @@ import org.springframework.http.HttpStatus;
 
 public class DrawingAnalysisViewException extends CustomException {
     public DrawingAnalysisViewException() {
-        super(HttpStatus.UNAUTHORIZED, ErrorMessage.CAN_NOT_VIEW_DRAWING_ANALYSIS.getMessage());
+        super(HttpStatus.FORBIDDEN, ErrorMessage.CAN_NOT_VIEW_DRAWING_ANALYSIS.getMessage());
     }
 }
