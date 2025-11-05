@@ -32,10 +32,10 @@ public class DrawingAnalyzeService {
 
     private final FastApiClient fastApiClient;
 
-    public DrawingAnalysisAndRecommendationResponse analyzeDrawingAndGetContentRecommendation(Long userId, DrawingAnalysisRequest drawingSaveRequest) {
+    public DrawingAnalysisAndRecommendationResponse analyzeDrawingAndGetContentRecommendation(Long userId, DrawingAnalysisRequest drawingAnalysisRequest) {
         User user = userFindService.findUser(userId);
-        String imageUrl = drawingSaveRequest.imageUrl();
-        String title = drawingSaveRequest.title();
+        String imageUrl = drawingAnalysisRequest.imageUrl();
+        String title = drawingAnalysisRequest.title();
 
         Drawing drawing = Drawing.createDrawing(user, title, imageUrl);
         Drawing savedDrawing = drawingSaveService.save(drawing); // 그림 저장 완료
@@ -63,8 +63,8 @@ public class DrawingAnalyzeService {
         ContentRecommendRequest contentRecommendRequest = new ContentRecommendRequest(
                 drawingAnalysisResponse.totalScore(),
                 drawingAnalysisResponse.detailedScores(),
-                drawingSaveRequest.latitude(),   // 요청에서 받은 위도
-                drawingSaveRequest.longitude()   // 요청에서 받은 경도
+                drawingAnalysisRequest.latitude(),   // 요청에서 받은 위도
+                drawingAnalysisRequest.longitude()   // 요청에서 받은 경도
         );
 
         // fast api 컨텐츠 추천 api 호출
