@@ -5,10 +5,14 @@ import com.drawandyou.drawandyou_server.domain.drawinganalysis.domain.repository
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.exception.DrawingAnalysisNotFoundException;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.exception.DrawingAnalysisViewException;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.response.DrawingAnalysisDetailResponse;
+import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.response.DrawingAnalysisListResponse;
+import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.response.DrawingAnalysisSimpleResponse;
 import com.drawandyou.drawandyou_server.domain.user.application.service.UserFindService;
 import com.drawandyou.drawandyou_server.domain.user.domain.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,5 +39,10 @@ public class DrawingAnalysisFindService {
         Hibernate.initialize(drawingAnalysis.getPlaceRecommendations());
 
         return DrawingAnalysisDetailResponse.toResponse(drawingAnalysis);
+    }
+
+    public DrawingAnalysisListResponse getDrawingAnalysisList(Long userId, int page, int size) {
+        Page<DrawingAnalysisSimpleResponse> results = drawingAnalysisRepository.findDrawingAnalysisList(userId, PageRequest.of(page, size));
+        return DrawingAnalysisListResponse.of(results);
     }
 }
