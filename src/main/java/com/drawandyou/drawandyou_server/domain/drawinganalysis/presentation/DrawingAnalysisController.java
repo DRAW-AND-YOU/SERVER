@@ -36,10 +36,10 @@ public class DrawingAnalysisController {
     }
 
     @Operation(summary = "그림 분석 결과 상세조회", description = "사용자가 그린 그림 분석결과에 대해 상세조회를 할 수 있는 API입니다.")
-    @GetMapping("/{drawing_analysis_id}")
+    @GetMapping("/{drawingAnalysisId}")
     public ApiResponse<DrawingAnalysisDetailResponse> getDrawingAnalysisDetail(
             @AuthenticationPrincipal Long userId,
-            @PathVariable(name = "drawing_analysis_id") Long drawingAnalysisId){
+            @PathVariable Long drawingAnalysisId){
 
         DrawingAnalysisDetailResponse response = drawingAnalysisFindService.getDrawingAnalysisDetail(userId, drawingAnalysisId);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.DRAWING_ANALYSIS_DETAIL_GET_SUCCESS.getMessage(), response);

@@ -9,6 +9,7 @@ import com.drawandyou.drawandyou_server.domain.drawinganalysis.domain.vo.VideoRe
 import java.util.List;
 
 public record DrawingAnalysisDetailResponse(
+        Long drawingAnalysisId,
         // 그림 정보
         String title,
         String imageUrl,
@@ -30,6 +31,7 @@ public record DrawingAnalysisDetailResponse(
         Drawing drawing = drawingAnalysis.getDrawing();
 
         return new DrawingAnalysisDetailResponse(
+                drawingAnalysis.getId(),
                 drawing.getTitle(),
                 drawing.getImageUrl(),
                 drawingAnalysis.getTotalScore(),
