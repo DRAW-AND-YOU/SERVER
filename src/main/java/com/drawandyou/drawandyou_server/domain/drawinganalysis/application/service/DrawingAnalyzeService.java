@@ -71,6 +71,21 @@ public class DrawingAnalyzeService {
         ContentRecommendationResponse contentRecommendationResponse =
                 fastApiClient.getContentRecommendationsSync(contentRecommendRequest);
 
+        assignRecommendationResultsToEntity(contentRecommendationResponse, drawingAnalysis);
+
+        // 분석 결과 저장 (추천 결과 포함)
+        drawingAnalysisSaveService.save(drawingAnalysis);
+
+        // 최종 응답 생성
+        return DrawingAnalysisAndRecommendationResponse.toResponse(
+                title,
+                imageUrl,
+                drawingAnalysisResponse,
+                contentRecommendationResponse
+        );
+    }
+
+    private static void assignRecommendationResultsToEntity(ContentRecommendationResponse contentRecommendationResponse, DrawingAnalysis drawingAnalysis) {
         // 추천 결과를 Value Object로 변환
         List<MusicRecommendationValue> musicRecommendations = contentRecommendationResponse.music().stream()
                 .map(m -> new MusicRecommendationValue(m.title(), m.artist(), m.url(), m.image()))
@@ -86,17 +101,6 @@ public class DrawingAnalyzeService {
 
         // DrawingAnalysis에 추천 결과 추가
         drawingAnalysis.addRecommendations(musicRecommendations, videoRecommendations, placeRecommendations);
-
-        // 분석 결과 저장 (추천 결과 포함)
-        drawingAnalysisSaveService.save(drawingAnalysis);
-
-        // 최종 응답 생성
-        return DrawingAnalysisAndRecommendationResponse.toResponse(
-                title,
-                imageUrl,
-                drawingAnalysisResponse,
-                contentRecommendationResponse
-        );
     }
 
     /**
