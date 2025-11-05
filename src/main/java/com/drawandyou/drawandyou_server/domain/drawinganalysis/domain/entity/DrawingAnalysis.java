@@ -22,9 +22,6 @@ public class DrawingAnalysis {
     @JoinColumn(name = "drawing_id")
     private Drawing drawing;
 
-    // 분석 점수
-    private int score;
-
     // 색상 분석 결과
     @Column(columnDefinition = "TEXT")
     private String colorAnalysis;
@@ -40,4 +37,42 @@ public class DrawingAnalysis {
     // 감정 상태
     private String emotionStatus;
 
+    // 분석 점수
+    private Integer totalScore;
+
+    // 세부 점수 - 객체 점수
+    private Integer objectScore;
+
+    // 세부 점수 - 이미지 점수
+    private Integer imageScore;
+
+    // 세부 점수 - 후질문 점수
+    private Integer questionScore;
+
+    /**
+     * DrawingAnalysisResponse를 기반으로 DrawingAnalysis 엔티티를 생성합니다.
+     */
+    public static DrawingAnalysis createAnalysis(
+            Drawing drawing,
+            String colorAnalysis,
+            String compositionAnalysis,
+            String lineAnalysis,
+            String emotionStatus,
+            Integer totalScore,
+            Integer objectScore,
+            Integer imageScore,
+            Integer questionScore
+    ) {
+        return DrawingAnalysis.builder()
+                .drawing(drawing)
+                .colorAnalysis(colorAnalysis)
+                .compositionAnalysis(compositionAnalysis)
+                .lineAnalysis(lineAnalysis)
+                .emotionStatus(emotionStatus)
+                .totalScore(totalScore)
+                .objectScore(objectScore)
+                .imageScore(imageScore)
+                .questionScore(questionScore)
+                .build();
+    }
 }

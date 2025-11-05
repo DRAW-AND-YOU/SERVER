@@ -1,5 +1,8 @@
 package com.drawandyou.drawandyou_server.global.client.fastapi;
 
+import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.DetailedScores;
+import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.request.ContentRecommendRequest;
+import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.response.ContentRecommendationResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -190,5 +193,54 @@ public class FastApiClient {
             log.error("Test Recommendation 동기 호출 실패 (score: {})", score, e);
             throw new RuntimeException("Test Recommendation 호출 중 오류가 발생했습니다: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * FastAPI의 /recommendation/ 엔드포인트를 호출하여 콘텐츠 추천을 받습니다.
+     *
+     * @param request 콘텐츠 추천 요청 정보 (점수, 세부 점수, 위치 정보)
+     * @return 콘텐츠 추천 응답 (음악, 비디오, 장소 추천)
+     */
+    public Mono<ContentRecommendationResponse> getContentRecommendations(ContentRecommendRequest request) {
+        return webClient.post()
+                .uri("/recommendation")
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(ContentRecommendationResponse.class)
+                .doOnSuccess(response -> log.info("Content Recommendation 응답 성공 (score: {}): {}", request.score(), response))
+                .doOnError(error -> log.error("Content Recommendation 호출 실패 (score: {})", request.score(), error));
+    }
+
+    /**
+     * FastAPI의 /recommendation/ 엔드포인트를 동기적으로 호출합니다.
+     *
+     * @param request 콘텐츠 추천 요청 정보
+     * @return 콘텐츠 추천 응답
+     */
+    public ContentRecommendationResponse getContentRecommendationsSync(ContentRecommendRequest request) {
+        try {
+            return getContentRecommendations(request).block();
+        } catch (Exception e) {
+            log.error("Content Recommendation 동기 호출 실패 (score: {})", request.score(), e);
+            throw new RuntimeException("Content Recommendation 호출 중 오류가 발생했습니다: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 테스트용 임시 데이터로 콘텐츠 추천을 요청합니다.
+     *
+     * @return 콘텐츠 추천 응답
+     */
+    public ContentRecommendationResponse getContentRecommendationsWithTestData() {
+        // 임시 테스트 데이터 생성
+        DetailedScores detailedScores = new DetailedScores(40, 40, 20);
+        ContentRecommendRequest request = new ContentRecommendRequest(
+                100,
+                detailedScores,
+                37.5050881,  // 서울 위도
+                126.9571012  // 서울 경도
+        );
+
+        return getContentRecommendationsSync(request);
     }
 }
