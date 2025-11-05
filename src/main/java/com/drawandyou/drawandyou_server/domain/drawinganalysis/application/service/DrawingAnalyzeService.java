@@ -19,7 +19,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -87,15 +89,21 @@ public class DrawingAnalyzeService {
 
     private static void assignRecommendationResultsToEntity(ContentRecommendationResponse contentRecommendationResponse, DrawingAnalysis drawingAnalysis) {
         // 추천 결과를 Value Object로 변환
-        List<MusicRecommendationValue> musicRecommendations = contentRecommendationResponse.music().stream()
+        List<MusicRecommendationValue> musicRecommendations = Optional.ofNullable(contentRecommendationResponse.music())
+                .orElseGet(Collections::emptyList)
+                .stream()
                 .map(m -> new MusicRecommendationValue(m.title(), m.artist(), m.url(), m.image()))
                 .toList();
 
-        List<VideoRecommendationValue> videoRecommendations = contentRecommendationResponse.video().stream()
+        List<VideoRecommendationValue> videoRecommendations = Optional.ofNullable(contentRecommendationResponse.video())
+                .orElseGet(Collections::emptyList)
+                .stream()
                 .map(v -> new VideoRecommendationValue(v.title(), v.url(), v.thumbnail()))
                 .toList();
 
-        List<PlaceRecommendationValue> placeRecommendations = contentRecommendationResponse.place().stream()
+        List<PlaceRecommendationValue> placeRecommendations = Optional.ofNullable(contentRecommendationResponse.place())
+                .orElseGet(Collections::emptyList)
+                .stream()
                 .map(p -> new PlaceRecommendationValue(p.title(), p.address(), p.url(), p.rating(), p.image()))
                 .toList();
 
