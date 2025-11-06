@@ -7,8 +7,6 @@ import com.drawandyou.drawandyou_server.domain.therapyprogram.domain.entity.Ther
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 import static jakarta.persistence.FetchType.*;
 
 @Getter
@@ -36,9 +34,6 @@ public class DailyCourse extends BaseEntity {
     // 데일리 코스의 이름 - "1일차 - 집 그리기"
     private String title;
 
-    // 데일리 코스 설명(지시사항) - "어떻게 그려주세요~~"
-    private String description;
-
     // 코스가 며칠차 코스인지
     // ex) HTP 테스트라면 1일차겠지.
     private Integer currentDay;
@@ -49,5 +44,13 @@ public class DailyCourse extends BaseEntity {
 
     // 코스 완료 여부
     private boolean isCompleted;
+
+    public void changeStatusToCompleted(){
+        this.isCompleted = true;
+    }
+
+    public void assignDrawing(Drawing drawing){
+        this.drawing = drawing;
+    }
 
 }
