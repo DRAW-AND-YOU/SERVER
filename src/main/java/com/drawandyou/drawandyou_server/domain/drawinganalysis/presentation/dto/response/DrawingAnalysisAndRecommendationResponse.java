@@ -4,6 +4,7 @@ import java.util.List;
 
 public record DrawingAnalysisAndRecommendationResponse(
         // 그림 정보
+        Long drawingId,
         String title,
         String imageUrl,
 
@@ -24,12 +25,14 @@ public record DrawingAnalysisAndRecommendationResponse(
      * DrawingAnalysisResponse와 ContentRecommendationResponse를 합쳐서 최종 응답을 생성합니다.
      */
     public static DrawingAnalysisAndRecommendationResponse toResponse(
+            Long drawingId,
             String drawingTitle,
             String drawingImageUrl,
             DrawingAnalysisResponse analysisResponse,
             ContentRecommendationResponse recommendationResponse
     ) {
         return new DrawingAnalysisAndRecommendationResponse(
+                drawingId,
                 drawingTitle,
                 drawingImageUrl,
                 analysisResponse.totalScore(),

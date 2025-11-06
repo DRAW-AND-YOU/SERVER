@@ -1,6 +1,7 @@
 package com.drawandyou.drawandyou_server.domain.drawinganalysis.application.service;
 
 import com.drawandyou.drawandyou_server.domain.drawing.domain.entity.Drawing;
+import com.drawandyou.drawandyou_server.domain.drawinganalysis.domain.entity.DrawingAnalysis;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.DetailedScores;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.request.ContentRecommendRequest;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.request.DrawingAnalysisRequest;
@@ -55,10 +56,11 @@ public class DrawingAnalyzeService {
                 fastApiClient.getContentRecommendationsSync(contentRecommendRequest);
 
         // 3. 외부 API 호출 성공 후, 트랜잭션 서비스를 통해 모든 엔티티 저장
-        transactionService.saveDrawingWithAnalysis(drawing, drawingAnalysisResponse, contentRecommendationResponse);
+        DrawingAnalysis drawingAnalysis = transactionService.saveDrawingWithAnalysis(drawing, drawingAnalysisResponse, contentRecommendationResponse);
 
         // 최종 응답 생성
         return DrawingAnalysisAndRecommendationResponse.toResponse(
+                drawingAnalysis.getDrawing().getId(),
                 title,
                 imageUrl,
                 drawingAnalysisResponse,
