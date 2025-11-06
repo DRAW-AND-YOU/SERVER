@@ -38,4 +38,19 @@ public class TherapyProgram extends BaseEntity {
     // 치유 프로그램의 전체 일수
     @Builder.Default
     private Integer totalDays = 5;
+
+    public static TherapyProgram createAndEnrollUser(User user) {
+        return TherapyProgram.builder()
+                .user(user)
+                .startDate(LocalDateTime.now())
+                .build();
+    }
+
+    public void changeStatusToFinish(){
+        this.isFinished = true;
+    }
+
+    public void assignEndDate(){
+        this.endDate = LocalDateTime.now();
+    }
 }
