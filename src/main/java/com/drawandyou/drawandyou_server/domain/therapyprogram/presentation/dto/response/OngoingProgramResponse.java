@@ -2,7 +2,7 @@ package com.drawandyou.drawandyou_server.domain.therapyprogram.presentation.dto.
 
 public record OngoingProgramResponse(
         Integer completedCourseCount,
-        Integer totalDay,
+        Integer totalDays,
         Long toParticipateDailyCourseId
 ) {
 }

@@ -51,12 +51,12 @@ public class TherapyProgramService {
         List<DailyCourse> dailyCourses = new ArrayList<>();
         // 치유 프로그램이 만들어지고 나서, DailyCourse(5개) 와 연관관계를 맺도록 한다.
         for (int day = 1; day <= TOTAL_DAILY_COURSE_COUNT; day++){
-            CourseType courType = courseTypes[day -1];
+            CourseType courseType = courseTypes[day -1];
 
             DailyCourse dailyCourse = DailyCourse.builder()
                     .therapyProgram(saveTherapyProgram)
                     .currentDay(day)
-                    .courseType(courType)
+                    .courseType(courseType)
                     .isCompleted(false)
                     .build();
 

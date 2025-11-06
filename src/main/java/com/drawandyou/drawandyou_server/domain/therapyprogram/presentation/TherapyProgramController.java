@@ -5,7 +5,7 @@ import com.drawandyou.drawandyou_server.domain.therapyprogram.application.servic
 import com.drawandyou.drawandyou_server.domain.therapyprogram.presentation.dto.response.OngoingProgramResponse;
 import com.drawandyou.drawandyou_server.domain.therapyprogram.presentation.message.ResponseMessage;
 import com.drawandyou.drawandyou_server.global.common.response.ApiResponse;
-import com.drawandyou.drawandyou_server.global.config.S3Config;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

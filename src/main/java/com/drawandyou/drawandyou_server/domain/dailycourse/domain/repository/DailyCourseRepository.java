@@ -1,6 +1,5 @@
 package com.drawandyou.drawandyou_server.domain.dailycourse.domain.repository;
 
-import aj.org.objectweb.asm.commons.Remapper;
 import com.drawandyou.drawandyou_server.domain.dailycourse.domain.entity.DailyCourse;
 import com.drawandyou.drawandyou_server.domain.therapyprogram.domain.entity.TherapyProgram;
 import org.springframework.data.jpa.repository.JpaRepository;

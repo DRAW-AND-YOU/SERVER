@@ -21,10 +21,6 @@ public class TherapyProgramFindService {
     private final DailyCourseRepository dailyCourseRepository;
     private final UserFindService userFindService;
 
-    public boolean isUserAlreadyParticipating(Long userId){
-        return therapyProgramRepository.existsByUserId(userId);
-    }
-
     public OngoingProgramResponse getOngoingProgramInfo(Long userId) {
         User user = userFindService.findUser(userId);
 
