@@ -11,6 +11,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -57,6 +58,8 @@ public class WebSecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // 세션 사용 안함 (jwt 기반이기 때문에) . 매우 중요
                 .authorizeHttpRequests(auth-> auth
+                        // 게시글 상세조회는 GET 요청만 인증 불필요
+                        .requestMatchers(HttpMethod.GET, "/api/articles/{articleId}").permitAll()
                         // Public endpoints (인증 불필요)
                         .requestMatchers(
                                 "/",
