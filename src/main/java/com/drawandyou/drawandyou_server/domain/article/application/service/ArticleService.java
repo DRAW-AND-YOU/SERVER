@@ -70,7 +70,7 @@ public class ArticleService {
                 .orElseThrow(ArticleNotFoundException::new);
 
         // 게시물을 삭제할 수 있는 권한이 있는지 검증 , 권한이 없다면 예외 발생
-        if (article.getUser() != user){
+        if (!article.getUser().equals(user)){
             throw new ArticleCanNotDeleteException();
         }
 
