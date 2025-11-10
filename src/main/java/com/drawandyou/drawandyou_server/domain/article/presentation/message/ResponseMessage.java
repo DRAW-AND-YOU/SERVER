@@ -10,7 +10,9 @@ public enum ResponseMessage {
     ARTICLE_CREATE_SUCCESS("게시글 생성에 성공했습니다"),
     ARTICLE_DETAIL_SUCCESS("게시글 상세 조회에 성공했습니다"),
     ARTICLE_UPDATE_SUCCESS("게시글 수정에 성공했습니다"),
-    ARTICLE_DELETE_SUCCESS("게시글 삭제에 성공했습니다");
+    ARTICLE_DELETE_SUCCESS("게시글 삭제에 성공했습니다"),
+    ARTICLE_VIEW_COUNT_INCREASEMENT_SUCCESS("게시글 조회수 증가에 성공했습니다."),
+    ARTICLE_VIEW_COUNT_GET_SUCCESS("게시글 조회수 조회에 성공했습니다.");
 
     private final String message;
 }
