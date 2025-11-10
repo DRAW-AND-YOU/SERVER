@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "ARTICLE VIEWS", description = "게시글 조회수 관련 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/articles-views")
+@RequestMapping("/api/article-views")
 public class ArticleViewController {
 
     private final ArticleViewService articleViewService;
