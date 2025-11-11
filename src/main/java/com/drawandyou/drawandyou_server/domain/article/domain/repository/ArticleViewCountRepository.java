@@ -15,7 +15,7 @@ public class ArticleViewCountRepository {
 
     public Long read(Long articleId){
         String result = redisTemplate.opsForValue().get(generateKey(articleId));
-        return result == null ? 0l : Long.parseLong(result);
+        return result == null ? 0L : Long.parseLong(result);
     }
 
     public Long increase(Long articleId){
