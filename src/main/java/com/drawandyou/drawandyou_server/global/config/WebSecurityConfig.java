@@ -58,8 +58,6 @@ public class WebSecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // 세션 사용 안함 (jwt 기반이기 때문에) . 매우 중요
                 .authorizeHttpRequests(auth-> auth
-                        // 게시글 상세조회는 GET 요청만 인증 불필요
-                        .requestMatchers(HttpMethod.GET, "/api/articles/{articleId}").permitAll()
                         // Public endpoints (인증 불필요)
                         .requestMatchers(
                                 "/",

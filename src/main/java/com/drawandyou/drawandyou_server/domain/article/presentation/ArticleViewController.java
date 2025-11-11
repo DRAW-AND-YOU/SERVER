@@ -1,6 +1,6 @@
 package com.drawandyou.drawandyou_server.domain.article.presentation;
 
-import com.drawandyou.drawandyou_server.domain.article.application.ArticleViewService;
+import com.drawandyou.drawandyou_server.domain.article.application.service.ArticleViewService;
 import com.drawandyou.drawandyou_server.domain.article.presentation.dto.response.ArticleViewCountResponse;
 import com.drawandyou.drawandyou_server.domain.article.presentation.message.ResponseMessage;
 import com.drawandyou.drawandyou_server.global.common.response.ApiResponse;
@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "ARTICLE VIEWS", description = "게시글 조회수 관련 API")
@@ -21,8 +22,10 @@ public class ArticleViewController {
 
     @Operation(summary = "게시글 조회수 증가")
     @PostMapping("/articles/{articleId}")
-    public ApiResponse<ArticleViewCountResponse> increase(@PathVariable Long articleId){
-        ArticleViewCountResponse response = articleViewService.increase(articleId);
+    public ApiResponse<ArticleViewCountResponse> increase(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long articleId){
+        ArticleViewCountResponse response = articleViewService.increase(articleId, userId);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.ARTICLE_VIEW_COUNT_INCREASEMENT_SUCCESS.getMessage(), response);
     }
 
