@@ -3,10 +3,10 @@ package com.drawandyou.drawandyou_server.global.common.response;
 import org.springframework.data.domain.Page;
 
 public record PageInfo(
-        int pageNumber,
-        int pageSize,
+        long pageNumber,
+        long pageSize,
         long totalElements,
-        int totalPages,
+        long totalPages,
         boolean first,
         boolean last,
         boolean empty
