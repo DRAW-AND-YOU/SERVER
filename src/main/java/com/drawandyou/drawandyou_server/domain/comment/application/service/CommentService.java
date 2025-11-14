@@ -3,6 +3,8 @@ package com.drawandyou.drawandyou_server.domain.comment.application.service;
 import com.drawandyou.drawandyou_server.domain.comment.domain.entity.Comment;
 import com.drawandyou.drawandyou_server.domain.comment.domain.entity.CommentPath;
 import com.drawandyou.drawandyou_server.domain.comment.domain.repository.CommentRepository;
+import com.drawandyou.drawandyou_server.domain.comment.exception.CommentNotFoundException;
+import com.drawandyou.drawandyou_server.domain.comment.exception.UnauthorizedCommentDeletionException;
 import com.drawandyou.drawandyou_server.domain.comment.presesntation.request.CommentCreateRequest;
 import com.drawandyou.drawandyou_server.domain.comment.presesntation.response.CommentPageResponse;
 import com.drawandyou.drawandyou_server.domain.comment.presesntation.response.CommentResponse;
@@ -10,6 +12,8 @@ import com.drawandyou.drawandyou_server.global.common.application.service.PageLi
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static java.util.function.Predicate.not;
 
@@ -20,13 +24,15 @@ public class CommentService {
     private final CommentRepository commentRepository;
 
     @Transactional
-    public CommentResponse create(CommentCreateRequest request){
+    public CommentResponse create(Long userId, CommentCreateRequest request){
+
         Comment parent = findParent(request);
         CommentPath parentCommentPath = parent == null ? CommentPath.create("") : parent.getCommentPath();
+
         Comment comment = commentRepository.save(Comment.create(
                 request.content(),
                 request.articleId(),
-                request.userId(),
+                userId,
                 parentCommentPath.createChildCommentPath(
                         commentRepository.findDescendantsTopPath(request.articleId(), parentCommentPath.getPath())
                                 .orElse(null)
@@ -36,6 +42,7 @@ public class CommentService {
     }
 
     private Comment findParent(CommentCreateRequest request) {
+
         String parentPath = request.parentPath();
         if (parentPath == null){
             return null;
@@ -46,6 +53,7 @@ public class CommentService {
                 .orElseThrow();
     }
 
+    @Transactional(readOnly = true)
     public CommentResponse read(Long commentId){
         return CommentResponse.from(
                 commentRepository.findById(commentId)
@@ -54,16 +62,26 @@ public class CommentService {
     }
 
     @Transactional
-    public void delete(Long commentId){
-        commentRepository.findById(commentId)
-                .filter(not(Comment::getDeleted))
-                .ifPresent(comment -> {
-                    if (hasChildren(comment)){
-                        comment.delete(); // 자식이 있다면 삭제 표시만
-                    } else{
-                        delete(comment); // 자식이 없다면 실제로 삭제
-                    }
-                });
+    public void delete(Long userId, Long commentId){
+
+        Comment comment = commentRepository.findById(commentId)
+                        .orElseThrow(CommentNotFoundException::new);
+
+        // 댓글 작성자가 아닌 사용자가 삭제하려고 할때 예외 반환
+        if (!comment.getUserId().equals(userId)){
+            throw new UnauthorizedCommentDeletionException();
+        }
+        // 삭제한 댓글을 다시 삭제하려고 하면, early return
+        if (comment.getDeleted()){
+            return;
+        }
+
+        if (hasChildren(comment)){
+            comment.delete(); // 자식이 있다면, 삭제 표시만
+        } else {
+            delete(comment); // 자식이 존재하지 않으면, 실제로 db 에서 삭제
+        }
+
     }
 
     private boolean hasChildren(Comment comment){
@@ -74,22 +92,32 @@ public class CommentService {
     }
 
     private void delete(Comment comment){
-        commentRepository.delete(comment);
+        commentRepository.delete(comment); // db 에서 삭제
+        // 부모 검사
         if (!comment.isRoot()){
             commentRepository.findByPath(comment.getCommentPath().getParentPath())
-                    .filter(Comment::getDeleted)
-                    .filter(not(this::hasChildren))
-                    .ifPresent(this::delete);
+                    .filter(Comment::getDeleted) // 부모 댓글이 삭제 표시 상태인지 확인
+                    .filter(not(this::hasChildren)) // 삭제 표시상태일때, 자식이 없는지 확인
+                    .ifPresent(this::delete); // 그렇다면, 부모댓글 재귀적으로 삭제
         }
 
     }
 
     public CommentPageResponse readAll(Long articleId, Long page, Long pageSize){
+        Long offset = (page - 1) * pageSize;
+        Long limit = PageLimitCalculator.calculatePageLimit(page, pageSize, 10L);
+
+        List<CommentResponse> comments = commentRepository.findAll(articleId, offset, pageSize).stream()
+                .map(CommentResponse::from)
+                .toList();
+
+        long totalElements = commentRepository.count(articleId, limit);
+
         return CommentPageResponse.of(
-                commentRepository.findAll(articleId, (page-1) * pageSize, pageSize).stream()
-                        .map(CommentResponse::from)
-                        .toList(),
-                commentRepository.count(articleId, PageLimitCalculator.calculatePageLimit(page, pageSize, 10L))
+                comments,
+                page,
+                pageSize.intValue(),
+                totalElements
         );
     }
 
