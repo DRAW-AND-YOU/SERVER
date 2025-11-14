@@ -12,7 +12,7 @@ public class CommentPath {
 
     private String path;
 
-    private static final String CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrswuvwxyz";
+    private static final String CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     private static final int DEPTH_CHUNK_SIZE = 5; // 1depth 당 크기 5
     private static final int MAX_DEPTH = 5; // 댓글 depth 는 최대 5로 가정
 
