@@ -11,10 +11,12 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @Tag(name = "USER", description = "사용자 관련 API")
 @RestController
 @RequiredArgsConstructor
@@ -75,16 +77,28 @@ public class UserController {
     @Operation(summary = "로그아웃")
     @PostMapping("/logout")
     public ApiResponse<Void> logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("accessToken", "");
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setDomain(".drawandyou.com");
+        log.info("로그아웃 요청 시작");
 
-        response.addCookie(cookie);
+        try {
+            log.info("쿠키 생성 시작");
+            Cookie cookie = new Cookie("accessToken", "");
+            log.info("쿠키 생성 완료");
 
-        return ApiResponse.success(HttpStatus.OK, ResponseMessage.USER_LOGOUT_SUCCESS.getMessage());
+            cookie.setPath("/");
+            cookie.setMaxAge(0);
+            cookie.setHttpOnly(true);
+            cookie.setSecure(true);
+            cookie.setDomain(".drawandyou.com");
+
+            log.info("쿠키 설정 완료");
+            response.addCookie(cookie);
+            log.info("응답에 쿠키 추가 완료");
+
+            return ApiResponse.success(HttpStatus.OK, ResponseMessage.USER_LOGOUT_SUCCESS.getMessage());
+        } catch (Exception e) {
+            log.error("로그아웃 처리 중 에러 발생", e);
+            throw e;
+        }
     }
 
     @Operation(summary = "회원가입시 중복 ID 검증")
