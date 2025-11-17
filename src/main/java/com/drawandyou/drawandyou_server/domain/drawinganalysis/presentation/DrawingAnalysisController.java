@@ -50,7 +50,7 @@ public class DrawingAnalysisController {
     @GetMapping
     public ApiResponse<DrawingAnalysisListResponse> getDrawingAnalysisList(
             @AuthenticationPrincipal Long userId,
-            @RequestParam AnalysisSortType sortBy,
+            @RequestParam(defaultValue = "CREATED_AT") AnalysisSortType sortBy,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "6") int size){
 
