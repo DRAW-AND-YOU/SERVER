@@ -1,11 +1,14 @@
 package com.drawandyou.drawandyou_server.domain.like.domain.repository;
 
+import aj.org.objectweb.asm.commons.Remapper;
 import com.drawandyou.drawandyou_server.domain.like.domain.entity.ArticleLikeCount;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.util.Optional;
 
 public interface ArticleLikeCountRepository extends JpaRepository<ArticleLikeCount, Long> {
 
@@ -26,4 +29,5 @@ public interface ArticleLikeCountRepository extends JpaRepository<ArticleLikeCou
     int decrease(@Param("articleId") Long articleId);
 
 
+    Optional<ArticleLikeCount> findByArticleId(Long articleId);
 }
