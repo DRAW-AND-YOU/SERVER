@@ -1,6 +1,8 @@
 package com.drawandyou.drawandyou_server.domain.like.application.service;
 
+import com.drawandyou.drawandyou_server.domain.comment.domain.entity.ArticleCommentCount;
 import com.drawandyou.drawandyou_server.domain.like.domain.entity.ArticleLike;
+import com.drawandyou.drawandyou_server.domain.like.domain.entity.ArticleLikeCount;
 import com.drawandyou.drawandyou_server.domain.like.domain.repository.ArticleLikeCountRepository;
 import com.drawandyou.drawandyou_server.domain.like.domain.repository.ArticleLikeRepository;
 import com.drawandyou.drawandyou_server.domain.like.exception.ArticleLikeNotFoundException;
@@ -42,5 +44,11 @@ public class ArticleLikeService {
                     articleLikeRepository.delete(articleLike);
                     articleLikeCountRepository.decrease(articleId);
                 });
+    }
+
+    public Long count(Long articleId){
+        return articleLikeCountRepository.findByArticleId(articleId)
+                .map(ArticleLikeCount::getLikeCount)
+                .orElse(0L);
     }
 }
