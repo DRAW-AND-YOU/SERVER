@@ -20,9 +20,6 @@ public class ArticleLikeCount {
 
     private Long likeCount;
 
-    @Version
-    private Long version;
-
     public static ArticleLikeCount init(Long articleId, Long likeCount){
         return ArticleLikeCount.builder()
                 .articleId(articleId)
