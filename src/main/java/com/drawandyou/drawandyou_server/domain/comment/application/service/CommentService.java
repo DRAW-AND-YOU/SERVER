@@ -1,5 +1,7 @@
 package com.drawandyou.drawandyou_server.domain.comment.application.service;
 
+import com.drawandyou.drawandyou_server.domain.article.domain.repository.ArticleCommentCountRepository;
+import com.drawandyou.drawandyou_server.domain.comment.domain.entity.ArticleCommentCount;
 import com.drawandyou.drawandyou_server.domain.comment.domain.entity.Comment;
 import com.drawandyou.drawandyou_server.domain.comment.domain.entity.CommentPath;
 import com.drawandyou.drawandyou_server.domain.comment.domain.repository.CommentRepository;
@@ -22,6 +24,7 @@ import static java.util.function.Predicate.not;
 public class CommentService {
 
     private final CommentRepository commentRepository;
+    private final ArticleCommentCountRepository articleCommentCountRepository;
 
     @Transactional
     public CommentResponse create(Long userId, CommentCreateRequest request){
@@ -38,6 +41,9 @@ public class CommentService {
                                 .orElse(null)
                 ))
         );
+
+        articleCommentCountRepository.increase(request.articleId());
+
         return CommentResponse.from(comment);
     }
 
@@ -93,6 +99,7 @@ public class CommentService {
 
     private void delete(Comment comment){
         commentRepository.delete(comment); // db 에서 삭제
+        articleCommentCountRepository.decrease(comment.getArticleId());
         // 부모 검사
         if (!comment.isRoot()){
             commentRepository.findByPath(comment.getCommentPath().getParentPath())
@@ -119,6 +126,12 @@ public class CommentService {
                 pageSize.intValue(),
                 totalElements
         );
+    }
+
+    public Long count(Long articleId){
+        return articleCommentCountRepository.findById(articleId)
+                .map(ArticleCommentCount::getCommentCount)
+                .orElse(0L);
     }
 
 

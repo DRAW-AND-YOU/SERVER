@@ -56,4 +56,11 @@ public class CommentController {
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.COMMENT_PAGINATION_GET_SUCCESS.getMessage(), response);
     }
 
+    @Operation(summary = "특정 게시글의 댓글 수 조회하기")
+    @GetMapping("/articles/{articleId}/count")
+    public ApiResponse<Long> count(@PathVariable Long articleId) {
+        Long count = commentService.count(articleId);
+        return ApiResponse.success(HttpStatus.OK, ResponseMessage.COMMENT_COUNT_GET_SUCCESS.getMessage(), count);
+    }
+
 }
