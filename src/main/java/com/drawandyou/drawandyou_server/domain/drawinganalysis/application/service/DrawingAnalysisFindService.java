@@ -4,6 +4,7 @@ import com.drawandyou.drawandyou_server.domain.drawinganalysis.domain.entity.Dra
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.domain.repository.DrawingAnalysisRepository;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.exception.DrawingAnalysisNotFoundException;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.exception.DrawingAnalysisViewException;
+import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.request.enums.AnalysisSortType;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.response.DrawingAnalysisDetailResponse;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.response.DrawingAnalysisListResponse;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.response.DrawingAnalysisSimpleResponse;
@@ -41,8 +42,8 @@ public class DrawingAnalysisFindService {
         return DrawingAnalysisDetailResponse.toResponse(drawingAnalysis);
     }
 
-    public DrawingAnalysisListResponse getDrawingAnalysisList(Long userId, int page, int size) {
-        Page<DrawingAnalysisSimpleResponse> results = drawingAnalysisRepository.findDrawingAnalysisList(userId, PageRequest.of(page, size));
+    public DrawingAnalysisListResponse getDrawingAnalysisList(AnalysisSortType sortBy, Long userId, int page, int size) {
+        Page<DrawingAnalysisSimpleResponse> results = drawingAnalysisRepository.findDrawingAnalysisList(sortBy, userId, PageRequest.of(page, size));
         return DrawingAnalysisListResponse.of(results);
     }
 }
