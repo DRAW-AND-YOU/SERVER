@@ -71,7 +71,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             log.info("doFilterInternal - Token source: {}", token != null ? "found" : "not found");
 
-            if (token != null && !token.equalsIgnoreCase("null")) {
+            if (token != null && !token.isEmpty() && !token.equalsIgnoreCase("null")) {
                 String userId = tokenProvider.validateAndGetUserId(token);
                 log.info("Authenticated user ID : {}", userId);
 
