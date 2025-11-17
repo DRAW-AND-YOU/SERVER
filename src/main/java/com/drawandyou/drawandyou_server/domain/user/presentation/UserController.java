@@ -13,8 +13,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.Duration;
 
 @Slf4j
 @Tag(name = "USER", description = "사용자 관련 API")
@@ -80,19 +83,18 @@ public class UserController {
         log.info("로그아웃 요청 시작");
 
         try {
-            log.info("쿠키 생성 시작");
-            Cookie cookie = new Cookie("accessToken", "");
-            log.info("쿠키 생성 완료");
+            // ResponseCookie로 쿠키 삭제 (maxAge를 0으로 설정)
+            ResponseCookie deleteCookie = ResponseCookie.from("accessToken", "")
+                    .httpOnly(true)                    // JavaScript 접근 차단 (XSS 방어)
+                    .secure(true)                      // HTTPS에서만 전송
+                    .domain(".drawandyou.com")         // 서브도메인 간 쿠키 공유
+                    .path("/")                         // 모든 경로에서 쿠키 전송
+                    .maxAge(0)                         // 즉시 만료 (쿠키 삭제)
+                    .sameSite("None")                  // 크로스 사이트 전송 허용
+                    .build();
 
-            cookie.setPath("/");
-            cookie.setMaxAge(0);
-            cookie.setHttpOnly(true);
-            cookie.setSecure(true);
-            cookie.setDomain(".drawandyou.com");
-
-            log.info("쿠키 설정 완료");
-            response.addCookie(cookie);
-            log.info("응답에 쿠키 추가 완료");
+            response.addHeader("Set-Cookie", deleteCookie.toString());
+            log.info("로그아웃 성공");
 
             return ApiResponse.success(HttpStatus.OK, ResponseMessage.USER_LOGOUT_SUCCESS.getMessage());
         } catch (Exception e) {
