@@ -1,7 +1,6 @@
 package com.drawandyou.drawandyou_server.domain.like.application.service;
 
 import com.drawandyou.drawandyou_server.domain.like.domain.entity.ArticleLike;
-import com.drawandyou.drawandyou_server.domain.like.domain.entity.ArticleLikeCount;
 import com.drawandyou.drawandyou_server.domain.like.domain.repository.ArticleLikeCountRepository;
 import com.drawandyou.drawandyou_server.domain.like.domain.repository.ArticleLikeRepository;
 import com.drawandyou.drawandyou_server.domain.like.exception.ArticleLikeNotFoundException;
@@ -26,17 +25,14 @@ public class ArticleLikeService {
     // update 시점에만 쓰기 락 잡기
     @Transactional
     public void likePessimisticLock(Long articleId, Long userId){
+
+        // 좋아요를 누를때, 이미 존재하면 return
+        if (articleLikeRepository.findByArticleIdAndUserId(articleId, userId).isPresent()){
+            return;
+        }
         articleLikeRepository.save(ArticleLike.create(articleId, userId));
 
-        // update 할 데이터가 없을 수도 있다.
-        int result = articleLikeCountRepository.increase(articleId);
-        if (result == 0){ // 아직 data 가 없는 거니까, 초기화해서 넣어주면 된다.
-            // 즉 최초 요청시에는 update 되는 레코드가 없으므로, 1로 초기화.
-            // 트래픽이 순식간에 몰리는 상황에서는 유실 가능성이 있으므로, 게시글 생성 시점에 0으로 초기화 해둘 수도 있겠지.
-            articleLikeCountRepository.save(
-                    ArticleLikeCount.init(articleId, 1L)
-            );
-        }
+        articleLikeCountRepository.increase(articleId);
     }
 
     @Transactional
