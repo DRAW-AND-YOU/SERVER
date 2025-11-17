@@ -38,10 +38,23 @@ public class UserController {
      */
     @Operation(summary = "일반 로그인")
     @PostMapping("/signin")
-    public ApiResponse<LoginResponse> authenticate(@RequestBody LoginRequest loginRequest) {
+    public ApiResponse<LoginResponse> authenticate(
+            @RequestBody LoginRequest loginRequest,
+            HttpServletResponse response
+    ) {
+        LoginResponse loginResponse = userService.signIn(loginRequest.email(), loginRequest.password());
 
-        LoginResponse response = userService.signIn(loginRequest.username(), loginRequest.password());
-        return ApiResponse.success(HttpStatus.OK, ResponseMessage.USER_SIGNIN_SUCCESS.getMessage(), response);
+        // 액세스 토큰을 HttpOnly 쿠키에 설정
+        Cookie cookie = new Cookie("accessToken", loginResponse.accessToken());
+        cookie.setPath("/");
+        cookie.setMaxAge(60 * 60); // 1시간
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setDomain(".drawandyou.com");
+
+        response.addCookie(cookie);
+
+        return ApiResponse.success(HttpStatus.OK, ResponseMessage.USER_SIGNIN_SUCCESS.getMessage(), loginResponse);
     }
 
     /**
