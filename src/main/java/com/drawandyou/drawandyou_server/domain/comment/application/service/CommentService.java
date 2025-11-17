@@ -42,12 +42,7 @@ public class CommentService {
                 ))
         );
 
-        int result = articleCommentCountRepository.increase(request.articleId());
-        if (result == 0 ){
-            articleCommentCountRepository.save(
-                    ArticleCommentCount.init(request.articleId(), 1L)
-            );
-        }
+        articleCommentCountRepository.increase(request.articleId());
 
         return CommentResponse.from(comment);
     }

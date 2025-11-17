@@ -1,6 +1,7 @@
 package com.drawandyou.drawandyou_server.domain.article.application.service;
 
 import com.drawandyou.drawandyou_server.domain.article.domain.entity.Article;
+import com.drawandyou.drawandyou_server.domain.article.domain.repository.ArticleCommentCountRepository;
 import com.drawandyou.drawandyou_server.domain.article.exception.ArticleCanNotDeleteException;
 import com.drawandyou.drawandyou_server.domain.article.exception.ArticleNotFoundException;
 import com.drawandyou.drawandyou_server.domain.article.exception.ArticleNotModifiableException;
@@ -11,6 +12,9 @@ import com.drawandyou.drawandyou_server.domain.article.domain.repository.Article
 
 import com.drawandyou.drawandyou_server.domain.articleimage.domain.entity.ArticleImage;
 import com.drawandyou.drawandyou_server.domain.articleimage.domain.repository.ArticleImageRepository;
+import com.drawandyou.drawandyou_server.domain.comment.domain.entity.ArticleCommentCount;
+import com.drawandyou.drawandyou_server.domain.like.domain.entity.ArticleLikeCount;
+import com.drawandyou.drawandyou_server.domain.like.domain.repository.ArticleLikeCountRepository;
 import com.drawandyou.drawandyou_server.domain.user.application.service.UserFindService;
 import com.drawandyou.drawandyou_server.domain.user.domain.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +28,9 @@ public class ArticleService {
     private final ArticleRepository articleRepository;
     private final ArticleImageRepository articleImageRepository;
 
+    private final ArticleCommentCountRepository articleCommentCountRepository;
+    private final ArticleLikeCountRepository articleLikeCountRepository;
+
     private final UserFindService userFindService;
 
     @Transactional
@@ -36,6 +43,10 @@ public class ArticleService {
 
         String articleImageUrl = request.imageUrl();
         articleImageRepository.save(ArticleImage.create(savedArticle, articleImageUrl));
+
+        // article 생성시점에 , article comment count , article like count 를 0으로 초기화하자.
+        articleLikeCountRepository.save(ArticleLikeCount.init(savedArticle.getId(), 0L));
+        articleCommentCountRepository.save(ArticleCommentCount.init(savedArticle.getId(), 0L));
 
         return ArticleCreateResponse.toResponse(userId, savedArticle.getId(), articleImageUrl);
     }
