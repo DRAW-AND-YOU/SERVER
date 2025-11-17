@@ -1,7 +1,9 @@
 package com.drawandyou.drawandyou_server.domain.drawinganalysis.domain.repository;
 
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.domain.entity.QDrawingAnalysis;
+import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.request.enums.AnalysisSortType;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.response.DrawingAnalysisSimpleResponse;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +22,7 @@ public class DrawingAnalysisRepositoryImpl implements DrawingAnalysisRepositoryC
     private final QDrawingAnalysis drawingAnalysis = QDrawingAnalysis.drawingAnalysis;
 
     @Override
-    public Page<DrawingAnalysisSimpleResponse> findDrawingAnalysisList(Long userId, Pageable pageable) {
+    public Page<DrawingAnalysisSimpleResponse> findDrawingAnalysisList(AnalysisSortType sortBy, Long userId, Pageable pageable) {
         // 전체 개수 조회
         Long total = queryFactory
                 .select(drawingAnalysis.count())
@@ -43,11 +45,18 @@ public class DrawingAnalysisRepositoryImpl implements DrawingAnalysisRepositoryC
                 ))
                 .from(drawingAnalysis)
                 .where(drawingAnalysis.drawing.user.id.eq(userId))
-                .orderBy(drawingAnalysis.drawing.createdAt.desc())
+                .orderBy(getSortCondition(sortBy))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
         return new PageImpl<>(content, pageable, total);
+    }
+
+    private OrderSpecifier<?> getSortCondition(AnalysisSortType sortType) {
+        return switch (sortType) {
+            case NAME -> drawingAnalysis.drawing.title.asc();
+            case CREATED_AT -> drawingAnalysis.drawing.createdAt.desc();
+        };
     }
 }

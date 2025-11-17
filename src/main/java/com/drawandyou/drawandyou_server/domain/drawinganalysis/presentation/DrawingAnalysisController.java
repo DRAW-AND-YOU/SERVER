@@ -4,6 +4,7 @@ import com.drawandyou.drawandyou_server.domain.drawinganalysis.application.servi
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.request.DrawingAnalysisRequest;
 
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.application.service.DrawingAnalyzeService;
+import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.request.enums.AnalysisSortType;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.response.DrawingAnalysisAndRecommendationResponse;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.response.DrawingAnalysisDetailResponse;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.response.DrawingAnalysisListResponse;
@@ -49,10 +50,11 @@ public class DrawingAnalysisController {
     @GetMapping
     public ApiResponse<DrawingAnalysisListResponse> getDrawingAnalysisList(
             @AuthenticationPrincipal Long userId,
+            @RequestParam AnalysisSortType sortBy,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "6") int size){
 
-        DrawingAnalysisListResponse response = drawingAnalysisFindService.getDrawingAnalysisList(userId, page, size);
+        DrawingAnalysisListResponse response = drawingAnalysisFindService.getDrawingAnalysisList(sortBy, userId, page, size);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.DRAWING_ANALYSIS_LIST_GET_SUCCESS.getMessage(), response);
     }
 }
