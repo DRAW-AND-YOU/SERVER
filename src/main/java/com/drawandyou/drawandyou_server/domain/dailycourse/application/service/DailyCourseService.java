@@ -34,7 +34,7 @@ public class DailyCourseService {
                 .orElseThrow(DailyCourseNotFoundException::new);
 
         // 특정 dailyCourse 를 진행중인 유저만 코스 완료를 할 수 있도록 한다. 그렇지 않다면 예외처리
-        if(dailyCourse.getTherapyProgram().getUser().equals(user)){
+        if(!dailyCourse.getTherapyProgram().getUser().equals(user)){
             throw new DailyCourseAccessDeniedException();
         }
 
