@@ -75,7 +75,19 @@ public class ArticleController {
             @RequestParam(required = false) LocalDateTime lastCreatedAt,
             @RequestParam(required = false) Long lastArticleId
     ) {
-        ArticleScrollResponse response = articleService.readAllInfiniteScroll(lastCreatedAt, limit, lastArticleId);
+        ArticleScrollResponse response = articleService.readAllInfiniteScroll(null, lastCreatedAt, limit, lastArticleId);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.ARTICLE_SCROLL_SUCCESS.getMessage(), response);
+    }
+
+    @Operation(summary = "자신이 작성한 게시글 리스트 조회(무한스크롤)")
+    @GetMapping("/my/infinite-scrolls")
+    public ApiResponse<ArticleScrollResponse> getMyArticlesInfiniteScroll(
+            @AuthenticationPrincipal Long userId,
+            @RequestParam(defaultValue = "20") Long limit,
+            @RequestParam(required = false) LocalDateTime lastCreatedAt,
+            @RequestParam(required = false) Long lastArticleId
+    ) {
+        ArticleScrollResponse response = articleService.readAllInfiniteScroll(userId, lastCreatedAt, limit, lastArticleId);
+        return ApiResponse.success(HttpStatus.OK, ResponseMessage.MY_ARTICLE_SCROLL_SUCCESS.getMessage(), response);
     }
 }

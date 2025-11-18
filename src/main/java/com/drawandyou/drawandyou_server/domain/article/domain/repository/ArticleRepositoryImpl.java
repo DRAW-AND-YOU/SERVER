@@ -28,7 +28,7 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
     private final QArticleLikeCount articleLikeCount = QArticleLikeCount.articleLikeCount;
 
     @Override
-    public List<ArticleResponse> findAllInfiniteScroll(Long limit) {
+    public List<ArticleResponse> findAllInfiniteScroll(Long userId, Long limit, LocalDateTime lastCreatedAt, Long lastArticleId) {
         return queryFactory
                 .select(Projections.constructor(ArticleResponse.class,
                         article.id,
@@ -42,33 +42,23 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
                 .leftJoin(articleImage).on(articleImage.article.eq(article))
                 .leftJoin(user).on(article.user.eq(user))
                 .leftJoin(articleLikeCount).on(articleLikeCount.articleId.eq(article.id))
+                .where(
+                        userIdEq(userId),
+                        cursorCondition(lastCreatedAt, lastArticleId)
+                )
                 .orderBy(article.createdAt.desc(), article.id.desc())
                 .limit(limit + 1) // hasNext 판단용
                 .fetch();
     }
 
-    @Override
-    public List<ArticleResponse> findAllInfiniteScroll(Long limit, LocalDateTime lastCreatedAt, Long lastArticleId) {
-        return queryFactory
-                .select(Projections.constructor(ArticleResponse.class,
-                        article.id,
-                        articleImage.imageUrl,
-                        user.username,
-                        Expressions.constant(0L),
-                        articleLikeCount.likeCount.coalesce(0L),
-                        article.createdAt
-                ))
-                .from(article)
-                .leftJoin(articleImage).on(articleImage.article.eq(article))
-                .leftJoin(user).on(article.user.eq(user))
-                .leftJoin(articleLikeCount).on(articleLikeCount.articleId.eq(article.id))
-                .where(cursorCondition(lastCreatedAt, lastArticleId))
-                .orderBy(article.createdAt.desc(), article.id.desc())
-                .limit(limit + 1) // hasNext 판단용
-                .fetch();
+    private BooleanExpression userIdEq(Long userId) {
+        return userId != null ? article.user.id.eq(userId) : null;
     }
 
     private BooleanExpression cursorCondition(LocalDateTime lastCreatedAt, Long lastArticleId) {
+        if (lastCreatedAt == null || lastArticleId == null) {
+            return null;
+        }
         return article.createdAt.lt(lastCreatedAt)
                 .or(article.createdAt.eq(lastCreatedAt).and(article.id.lt(lastArticleId)));
     }
