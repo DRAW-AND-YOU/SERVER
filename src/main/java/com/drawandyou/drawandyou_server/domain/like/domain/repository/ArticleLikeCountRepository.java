@@ -1,6 +1,5 @@
 package com.drawandyou.drawandyou_server.domain.like.domain.repository;
 
-import aj.org.objectweb.asm.commons.Remapper;
 import com.drawandyou.drawandyou_server.domain.like.domain.entity.ArticleLikeCount;
 
 import org.springframework.data.jpa.repository.JpaRepository;
