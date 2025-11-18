@@ -107,11 +107,9 @@ public class ArticleService {
     }
 
     @Transactional(readOnly = true)
-    public ArticleScrollResponse readAllInfiniteScroll(LocalDateTime lastCreatedAt, Long pageSize, Long lastArticleId){
+    public ArticleScrollResponse readAllInfiniteScroll(Long userId, LocalDateTime lastCreatedAt, Long pageSize, Long lastArticleId){
 
-        List<ArticleResponse> articles = lastArticleId == null ?
-                articleRepository.findAllInfiniteScroll(pageSize) :
-                articleRepository.findAllInfiniteScroll(pageSize, lastCreatedAt, lastArticleId);
+        List<ArticleResponse> articles = articleRepository.findAllInfiniteScroll(userId, pageSize, lastCreatedAt, lastArticleId);
 
         // redis 에서 multi get 으로 articleIds 에 대한 조회수를 한번에 조회한다.
         List<Long> articleIds = articles.stream()
@@ -135,6 +133,5 @@ public class ArticleService {
         // ArticleScrollResponse로 변환하기
         return ArticleScrollResponse.of(articlesWithViewCount, pageSize);
     }
-
 
 }

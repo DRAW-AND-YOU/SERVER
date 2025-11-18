@@ -7,7 +7,5 @@ import java.util.List;
 
 public interface ArticleRepositoryCustom {
 
-    List<ArticleResponse> findAllInfiniteScroll(Long limit);
-
-    List<ArticleResponse> findAllInfiniteScroll(Long limit, LocalDateTime lastCreatedAt, Long lastArticleId);
+    List<ArticleResponse> findAllInfiniteScroll(Long userId, Long limit, LocalDateTime lastCreatedAt, Long lastArticleId);
 }

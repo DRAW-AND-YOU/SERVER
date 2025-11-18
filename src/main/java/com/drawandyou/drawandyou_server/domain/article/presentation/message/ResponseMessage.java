@@ -13,7 +13,8 @@ public enum ResponseMessage {
     ARTICLE_DELETE_SUCCESS("게시글 삭제에 성공했습니다"),
     ARTICLE_VIEW_COUNT_INCREASEMENT_SUCCESS("게시글 조회수 증가에 성공했습니다."),
     ARTICLE_VIEW_COUNT_GET_SUCCESS("게시글 조회수 조회에 성공했습니다."),
-    ARTICLE_SCROLL_SUCCESS("게시글 목록 무한스크롤 조회에 성공했습니다");
+    ARTICLE_SCROLL_SUCCESS("게시글 목록 무한스크롤 조회에 성공했습니다"),
+    MY_ARTICLE_SCROLL_SUCCESS("자신이 작성한 게시글 목록 무한스크롤 조회에 성공했습니다");
 
     private final String message;
 }
