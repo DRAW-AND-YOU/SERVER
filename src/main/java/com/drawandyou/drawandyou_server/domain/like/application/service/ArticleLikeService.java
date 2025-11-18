@@ -22,6 +22,8 @@ public class ArticleLikeService {
         return articleLikeRepository.findByArticleIdAndUserId(articleId, userId)
                 .map(ArticleLikeResponse::from)
                 .orElseThrow(ArticleLikeNotFoundException::new);
+
+
     }
 
     // update 시점에만 쓰기 락 잡기

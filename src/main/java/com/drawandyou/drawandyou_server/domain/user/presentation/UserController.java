@@ -7,7 +7,6 @@ import com.drawandyou.drawandyou_server.domain.user.application.service.UserServ
 import com.drawandyou.drawandyou_server.domain.user.presentation.message.ResponseMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -49,15 +48,17 @@ public class UserController {
     ) {
         LoginResponse loginResponse = userService.signIn(loginRequest.email(), loginRequest.password());
 
-        // 액세스 토큰을 HttpOnly 쿠키에 설정
-        Cookie cookie = new Cookie("accessToken", loginResponse.accessToken());
-        cookie.setPath("/");
-        cookie.setMaxAge(60 * 60); // 1시간
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setDomain(".drawandyou.com");
+        // ResponseCookie를 사용하여 액세스 토큰을 HttpOnly 쿠키에 설정
+        ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", loginResponse.accessToken())
+                .httpOnly(true)
+                .secure(true)
+                .domain(".drawandyou.com")
+                .path("/")
+                .maxAge(Duration.ofHours(1))
+                .sameSite("None")
+                .build();
 
-        response.addCookie(cookie);
+        response.addHeader("Set-Cookie", accessTokenCookie.toString());
 
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.USER_SIGNIN_SUCCESS.getMessage(), loginResponse);
     }
