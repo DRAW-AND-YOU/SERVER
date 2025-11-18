@@ -2,6 +2,7 @@ package com.drawandyou.drawandyou_server.domain.article.application.service;
 
 import com.drawandyou.drawandyou_server.domain.article.domain.entity.Article;
 import com.drawandyou.drawandyou_server.domain.article.domain.repository.ArticleCommentCountRepository;
+import com.drawandyou.drawandyou_server.domain.article.domain.repository.ArticleViewCountRepository;
 import com.drawandyou.drawandyou_server.domain.article.exception.ArticleCanNotDeleteException;
 import com.drawandyou.drawandyou_server.domain.article.exception.ArticleNotFoundException;
 import com.drawandyou.drawandyou_server.domain.article.exception.ArticleNotModifiableException;
@@ -10,6 +11,8 @@ import com.drawandyou.drawandyou_server.domain.article.presentation.dto.request.
 import com.drawandyou.drawandyou_server.domain.article.presentation.dto.response.ArticleCreateResponse;
 import com.drawandyou.drawandyou_server.domain.article.domain.repository.ArticleRepository;
 
+import com.drawandyou.drawandyou_server.domain.article.presentation.dto.response.ArticleResponse;
+import com.drawandyou.drawandyou_server.domain.article.presentation.dto.response.ArticleScrollResponse;
 import com.drawandyou.drawandyou_server.domain.articleimage.domain.entity.ArticleImage;
 import com.drawandyou.drawandyou_server.domain.articleimage.domain.repository.ArticleImageRepository;
 import com.drawandyou.drawandyou_server.domain.comment.domain.entity.ArticleCommentCount;
@@ -21,6 +24,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 public class ArticleService {
@@ -30,6 +37,7 @@ public class ArticleService {
 
     private final ArticleCommentCountRepository articleCommentCountRepository;
     private final ArticleLikeCountRepository articleLikeCountRepository;
+    private final ArticleViewCountRepository articleViewCountRepository;
 
     private final UserFindService userFindService;
 
@@ -96,6 +104,36 @@ public class ArticleService {
         ArticleImage articleImage = articleImageRepository.findByArticle(article);
         articleImageRepository.delete(articleImage);
         articleImageRepository.save(ArticleImage.create(article , toUpdateImageUrl));
+    }
+
+    @Transactional(readOnly = true)
+    public ArticleScrollResponse readAllInfiniteScroll(LocalDateTime lastCreatedAt, Long pageSize, Long lastArticleId){
+
+        List<ArticleResponse> articles = lastArticleId == null ?
+                articleRepository.findAllInfiniteScroll(pageSize) :
+                articleRepository.findAllInfiniteScroll(pageSize, lastCreatedAt, lastArticleId);
+
+        // redis 에서 multi get 으로 articleIds 에 대한 조회수를 한번에 조회한다.
+        List<Long> articleIds = articles.stream()
+                .map(ArticleResponse::articleId)
+                .toList();
+
+        Map<Long, Long> viewCountMap = articleViewCountRepository.readMultiple(articleIds);
+
+        // 조회수를 포함해서 response 다시 조립하기
+        List<ArticleResponse> articlesWithViewCount = articles.stream()
+                .map(article -> new ArticleResponse(
+                        article.articleId(),
+                        article.imageUrl(),
+                        article.authorName(),
+                        viewCountMap.getOrDefault(article.articleId(), 0L),
+                        article.likeCount(),
+                        article.createdAt()
+                ))
+                .toList();
+
+        // ArticleScrollResponse로 변환하기
+        return ArticleScrollResponse.of(articlesWithViewCount, pageSize);
     }
 
 

@@ -6,6 +6,7 @@ import com.drawandyou.drawandyou_server.domain.article.presentation.dto.request.
 import com.drawandyou.drawandyou_server.domain.article.presentation.dto.request.ArticleUpdateRequest;
 import com.drawandyou.drawandyou_server.domain.article.presentation.dto.response.ArticleCreateResponse;
 import com.drawandyou.drawandyou_server.domain.article.presentation.dto.response.ArticleDetailResponse;
+import com.drawandyou.drawandyou_server.domain.article.presentation.dto.response.ArticleScrollResponse;
 import com.drawandyou.drawandyou_server.domain.article.presentation.message.ResponseMessage;
 import com.drawandyou.drawandyou_server.global.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 @Tag(name = "ARTICLE", description = "게시글 관련 API")
 @RestController
@@ -63,5 +66,16 @@ public class ArticleController {
 
         articleService.deleteArticle(userId, articleId);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.ARTICLE_DELETE_SUCCESS.getMessage(), null);
+    }
+
+    @Operation(summary = "최신 게시글 리스트 조회(무한스크롤)")
+    @GetMapping("/infinite-scrolls")
+    public ApiResponse<ArticleScrollResponse> getArticlesInfiniteScroll(
+            @RequestParam(defaultValue = "20") Long limit,
+            @RequestParam(required = false) LocalDateTime lastCreatedAt,
+            @RequestParam(required = false) Long lastArticleId
+    ) {
+        ArticleScrollResponse response = articleService.readAllInfiniteScroll(lastCreatedAt, limit, lastArticleId);
+        return ApiResponse.success(HttpStatus.OK, ResponseMessage.ARTICLE_SCROLL_SUCCESS.getMessage(), response);
     }
 }
