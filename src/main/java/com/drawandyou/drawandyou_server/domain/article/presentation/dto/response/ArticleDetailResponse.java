@@ -12,10 +12,14 @@ public record ArticleDetailResponse(
         String title,
         String content,
         String imageUrl,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        Long viewCount,
+        Long likeCount
+
 ) {
     public static ArticleDetailResponse toResponse(
-          Article article, ArticleImage articleImage
+            Article article, ArticleImage articleImage,
+                     Long viewCount, Long likeCount
     ) {
         return new ArticleDetailResponse(
                 article.getId(),
@@ -24,7 +28,9 @@ public record ArticleDetailResponse(
                 article.getTitle(),
                 article.getContent(),
                 articleImage.getImageUrl(),
-                article.getCreatedAt()
+                article.getCreatedAt(),
+                viewCount,
+                likeCount
         );
     }
 }
