@@ -3,6 +3,7 @@ package com.drawandyou.drawandyou_server.domain.comment.presesntation;
 import com.drawandyou.drawandyou_server.domain.comment.application.service.CommentService;
 import com.drawandyou.drawandyou_server.domain.comment.presesntation.message.ResponseMessage;
 import com.drawandyou.drawandyou_server.domain.comment.presesntation.request.CommentCreateRequest;
+import com.drawandyou.drawandyou_server.domain.comment.presesntation.response.CommentCountResponse;
 import com.drawandyou.drawandyou_server.domain.comment.presesntation.response.CommentPageResponse;
 import com.drawandyou.drawandyou_server.domain.comment.presesntation.response.CommentResponse;
 import com.drawandyou.drawandyou_server.global.common.response.ApiResponse;
@@ -23,8 +24,10 @@ public class CommentController {
 
     @Operation(summary = "댓글 단건 조회")
     @GetMapping("/{commentId}")
-    public ApiResponse<CommentResponse> read(@PathVariable Long commentId){
-        CommentResponse response = commentService.read(commentId);
+    public ApiResponse<CommentResponse> read(
+            @PathVariable Long commentId,
+            @AuthenticationPrincipal Long userId){
+        CommentResponse response = commentService.read(commentId, userId);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.COMMENT_READ_SUCCESS.getMessage(), response);
     }
 
@@ -51,15 +54,16 @@ public class CommentController {
     public ApiResponse<CommentPageResponse> readAll(
             @RequestParam Long articleId,
             @RequestParam Long page,
-            @RequestParam Long size){
-        CommentPageResponse response = commentService.readAll(articleId, page, size);
+            @RequestParam Long size,
+            @AuthenticationPrincipal Long userId){
+        CommentPageResponse response = commentService.readAll(articleId, page, size, userId);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.COMMENT_PAGINATION_GET_SUCCESS.getMessage(), response);
     }
 
     @Operation(summary = "특정 게시글의 댓글 수 조회하기")
     @GetMapping("/articles/{articleId}/count")
-    public ApiResponse<Long> count(@PathVariable Long articleId) {
-        Long count = commentService.count(articleId);
+    public ApiResponse<CommentCountResponse> count(@PathVariable Long articleId) {
+        CommentCountResponse count = commentService.count(articleId);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.COMMENT_COUNT_GET_SUCCESS.getMessage(), count);
     }
 

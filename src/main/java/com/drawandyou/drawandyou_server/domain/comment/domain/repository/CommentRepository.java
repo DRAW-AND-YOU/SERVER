@@ -15,6 +15,9 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Query("select c from Comment c where c.commentPath.path = :path")
     Optional<Comment> findByPath(@Param("path") String path);
 
+    @Query("select c from Comment c where c.articleId = :articleId and c.commentPath.path = :path")
+    Optional<Comment> findByArticleIdAndPath(@Param("articleId") Long articleId, @Param("path") String path);
+
     @Query(
             value = "select path from comment " +
                     "where article_id = :articleId and path > :pathPrefix and path like :pathPrefix% " +
