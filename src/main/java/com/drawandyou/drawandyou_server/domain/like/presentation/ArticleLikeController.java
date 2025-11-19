@@ -2,6 +2,7 @@ package com.drawandyou.drawandyou_server.domain.like.presentation;
 
 import com.drawandyou.drawandyou_server.domain.like.application.service.ArticleLikeService;
 import com.drawandyou.drawandyou_server.domain.like.presentation.dto.response.ArticleLikeResponse;
+import com.drawandyou.drawandyou_server.domain.like.presentation.dto.response.LikeCountResponse;
 import com.drawandyou.drawandyou_server.domain.like.presentation.message.ResponseMessage;
 import com.drawandyou.drawandyou_server.global.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,8 +52,8 @@ public class ArticleLikeController {
 
     @Operation(summary = "특정 게시글의 좋아요 수 조회하기")
     @GetMapping("/articles/{articleId}/count")
-    public ApiResponse<Long> count(@PathVariable Long articleId) {
-        Long count = articleLikeService.count(articleId);
+    public ApiResponse<LikeCountResponse> count(@PathVariable Long articleId) {
+        LikeCountResponse count = articleLikeService.count(articleId);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.ARTICLE_LIKE_COUNT_GET_SUCCESS.getMessage(), count);
     }
 }
