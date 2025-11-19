@@ -7,6 +7,7 @@ import com.drawandyou.drawandyou_server.domain.like.domain.repository.ArticleLik
 import com.drawandyou.drawandyou_server.domain.like.domain.repository.ArticleLikeRepository;
 import com.drawandyou.drawandyou_server.domain.like.exception.ArticleLikeNotFoundException;
 import com.drawandyou.drawandyou_server.domain.like.presentation.dto.response.ArticleLikeResponse;
+import com.drawandyou.drawandyou_server.domain.like.presentation.dto.response.LikeCountResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,9 +49,11 @@ public class ArticleLikeService {
                 });
     }
 
-    public Long count(Long articleId){
-        return articleLikeCountRepository.findByArticleId(articleId)
+    public LikeCountResponse count(Long articleId){
+        Long likeCount = articleLikeCountRepository.findByArticleId(articleId)
                 .map(ArticleLikeCount::getLikeCount)
                 .orElse(0L);
+
+        return new LikeCountResponse(likeCount);
     }
 }
