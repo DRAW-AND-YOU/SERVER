@@ -7,6 +7,7 @@ public record CurrentLoginUserResponse(
         Long userId,
         String username,
         String nickname,
+        String profileImageUrl,
         boolean isSocialUser,
         boolean isRegisterCompleted
 ) {

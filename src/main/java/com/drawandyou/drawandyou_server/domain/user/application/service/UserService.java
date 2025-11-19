@@ -106,6 +106,7 @@ public class UserService {
                 .userId(user.getId())
                 .username(user.getUsername())
                 .nickname(user.getNickname())
+                .profileImageUrl(user.getProfileImageUrl())
                 .isSocialUser(isSocialUser)
                 .isRegisterCompleted(isRegisterCompleted)
                 .build();
