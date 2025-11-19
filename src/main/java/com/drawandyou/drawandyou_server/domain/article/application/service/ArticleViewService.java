@@ -16,7 +16,7 @@ public class ArticleViewService {
     private final ArticleViewCountRepository articleViewCountRepository;
     private final ArticleViewCountBackUpProcessor articleViewCountBackUpProcessor;
 
-    private static final int BACK_UP_BATCH_SIZE = 100;
+    private static final int BACK_UP_BATCH_SIZE = 5;
     private static final Duration TTL = Duration.ofMinutes(10);
 
     public ArticleViewCountResponse increase(Long articleId, Long userId){
