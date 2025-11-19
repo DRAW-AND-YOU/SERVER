@@ -98,7 +98,7 @@ public class WebSecurityConfig {
                 Arrays.asList("http://localhost:3000", "https://www.drawandyou.com", "https://api.drawandyou.com")
         );
         // 예를 들어, 리액트 프론트엔드가 http://localhost:3000 에서 실행된다면, 그 주소를 명시해야겟지
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // 허용할 메소드
+        configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS")); // 허용할 메소드
         configuration.setAllowedHeaders(List.of("*")); // 모든 요청 헤더 허용
         configuration.setExposedHeaders(List.of("*")); // 응답 헤더 노출 - 응답시 브라우저에서 접근 가능할 수 있도록 허용할 헤더를 지정.
         // 위의 CORS 설정을 모든 경로에 적용
