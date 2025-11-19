@@ -36,7 +36,7 @@ public class ArticleReadService {
                 .map(ArticleLikeCount::getLikeCount)
                 .orElse(0L);
 
-        Long viewCount = articleViewCountRepository.read(articleId);
+        Long viewCount = articleViewCountRepository.increase(articleId);
 
         return ArticleDetailResponse.toResponse(article, articleImage,viewCount, likeCount);
     }
