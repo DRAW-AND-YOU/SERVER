@@ -36,7 +36,7 @@ public class ArticleDetailService {
      * 조회 시 조회수를 증가시키고, 인기 점수를 업데이트 하는 이벤트를 발행
      */
     @Transactional(readOnly = true)
-    public ArticleDetailResponse getArticleDetail(Long articleId, Long userId, HttpServletRequest request) {
+    public ArticleDetailResponse getArticleDetail(Long articleId, Long userId) {
 
         // 게시글 조회
         Article article = articleRepository.findById(articleId)
@@ -45,7 +45,7 @@ public class ArticleDetailService {
         Long viewCount = articleViewService.increase(articleId, userId);
 
         // 조회 이벤트 발행
-        publishViewEvent(articleId, userId, request);
+        publishViewEvent(articleId, userId);
 
         Long likeCount = articleLikeCountRepository.findById(articleId)
                 .map(ArticleLikeCount::getLikeCount)
@@ -64,10 +64,9 @@ public class ArticleDetailService {
     /**
      * 조회 이벤트 발행
      */
-    private void publishViewEvent(Long articleId, Long userId, HttpServletRequest request) {
+    private void publishViewEvent(Long articleId, Long userId) {
         try {
-            String ipAddress = getClientIpAddress(request);
-            ArticleViewEvent event = ArticleViewEvent.of(articleId, userId, ipAddress);
+            ArticleViewEvent event = ArticleViewEvent.of(articleId, userId);
             eventPublisher.publishEvent(event);
 
             log.debug("게시글 조회 이벤트 발행 - articleId: {}, userId: {}", articleId, userId);
@@ -75,23 +74,5 @@ public class ArticleDetailService {
             // 이벤트 발행 실패해도 조회는 정상 처리
             log.error("조회 이벤트 발행 실패 - articleId: {}", articleId, e);
         }
-    }
-
-    /**
-     * 클라이언트 IP 주소 추출
-     */
-    private String getClientIpAddress(HttpServletRequest request) {
-        String xForwardedFor = request.getHeader("X-Forwarded-For");
-
-        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-            return xForwardedFor.split(",")[0].trim();
-        }
-
-        String xRealIp = request.getHeader("X-Real-IP");
-        if (xRealIp != null && !xRealIp.isEmpty()) {
-            return xRealIp;
-        }
-
-        return request.getRemoteAddr();
     }
 }

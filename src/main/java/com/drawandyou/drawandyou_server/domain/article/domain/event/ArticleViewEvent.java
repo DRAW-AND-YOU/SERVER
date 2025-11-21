@@ -10,10 +10,9 @@ import java.time.LocalDateTime;
 public class ArticleViewEvent {
     private final Long articleId;
     private final Long userId;
-    private final String ipAddress;
     private final LocalDateTime viewedAt;
 
-    public static ArticleViewEvent of(Long articleId, Long userId, String ipAddress) {
-        return new ArticleViewEvent(articleId, userId, ipAddress, LocalDateTime.now());
+    public static ArticleViewEvent of(Long articleId, Long userId) {
+        return new ArticleViewEvent(articleId, userId,LocalDateTime.now());
     }
 }

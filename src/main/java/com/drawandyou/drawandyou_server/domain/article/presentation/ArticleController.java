@@ -43,10 +43,9 @@ public class ArticleController {
     @GetMapping("/{articleId}")
     public ApiResponse<ArticleDetailResponse> getArticle(
             @AuthenticationPrincipal Long userId,
-            @PathVariable Long articleId,
-            HttpServletRequest request) {
+            @PathVariable Long articleId) {
 
-        ArticleDetailResponse response = articleDetailService.getArticleDetail(articleId, userId, request);
+        ArticleDetailResponse response = articleDetailService.getArticleDetail(articleId, userId);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.ARTICLE_DETAIL_SUCCESS.getMessage(), response);
     }
 
