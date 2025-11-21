@@ -4,6 +4,7 @@ import com.drawandyou.drawandyou_server.domain.article.domain.entity.ArticleView
 import com.drawandyou.drawandyou_server.domain.article.domain.repository.ArticleViewCountBackUpRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
@@ -12,7 +13,7 @@ public class ArticleViewCountBackUpProcessor {
 
     private final ArticleViewCountBackUpRepository articleViewCountBackUpRepository;
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void backUp(Long articleId, Long viewCount){
         int result = articleViewCountBackUpRepository.updateViewCount(articleId, viewCount);
         if (result == 0){
