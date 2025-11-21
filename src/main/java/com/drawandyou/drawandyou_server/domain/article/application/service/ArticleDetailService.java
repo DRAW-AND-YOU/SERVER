@@ -3,7 +3,6 @@ package com.drawandyou.drawandyou_server.domain.article.application.service;
 import com.drawandyou.drawandyou_server.domain.article.domain.entity.Article;
 import com.drawandyou.drawandyou_server.domain.article.domain.event.ArticleViewEvent;
 import com.drawandyou.drawandyou_server.domain.article.domain.repository.ArticleRepository;
-import com.drawandyou.drawandyou_server.domain.article.domain.repository.ArticleViewCountRepository;
 import com.drawandyou.drawandyou_server.domain.article.exception.ArticleNotFoundException;
 import com.drawandyou.drawandyou_server.domain.article.presentation.dto.response.ArticleDetailResponse;
 import com.drawandyou.drawandyou_server.domain.articleimage.domain.entity.ArticleImage;
@@ -15,8 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 @Slf4j
 @Service

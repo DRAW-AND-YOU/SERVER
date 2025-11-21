@@ -1,7 +1,5 @@
 package com.drawandyou.drawandyou_server.domain.article.application.service;
 
-
-import com.drawandyou.drawandyou_server.domain.article.domain.repository.ArticleRepository;
 import com.drawandyou.drawandyou_server.domain.article.domain.repository.ArticleViewCountRepository;
 import com.drawandyou.drawandyou_server.domain.article.presentation.dto.response.PopularArticleListResponse;
 import com.drawandyou.drawandyou_server.domain.article.presentation.dto.response.PopularArticleResponse;
