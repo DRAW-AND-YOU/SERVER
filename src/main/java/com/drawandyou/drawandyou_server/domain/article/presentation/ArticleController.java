@@ -1,16 +1,16 @@
 package com.drawandyou.drawandyou_server.domain.article.presentation;
 
-import com.drawandyou.drawandyou_server.domain.article.application.service.ArticleReadService;
+import com.drawandyou.drawandyou_server.domain.article.application.service.ArticleCacheService;
+import com.drawandyou.drawandyou_server.domain.article.application.service.ArticleDetailService;
 import com.drawandyou.drawandyou_server.domain.article.application.service.ArticleService;
 import com.drawandyou.drawandyou_server.domain.article.presentation.dto.request.ArticleCreateRequest;
 import com.drawandyou.drawandyou_server.domain.article.presentation.dto.request.ArticleUpdateRequest;
-import com.drawandyou.drawandyou_server.domain.article.presentation.dto.response.ArticleCreateResponse;
-import com.drawandyou.drawandyou_server.domain.article.presentation.dto.response.ArticleDetailResponse;
-import com.drawandyou.drawandyou_server.domain.article.presentation.dto.response.ArticleScrollResponse;
+import com.drawandyou.drawandyou_server.domain.article.presentation.dto.response.*;
 import com.drawandyou.drawandyou_server.domain.article.presentation.message.ResponseMessage;
 import com.drawandyou.drawandyou_server.global.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,7 +26,8 @@ import java.time.LocalDateTime;
 public class ArticleController {
 
     private final ArticleService articleService;
-    private final ArticleReadService articleReadService;
+    private final ArticleDetailService articleDetailService;
+    private final ArticleCacheService articleCacheService;
 
     @Operation(summary = "게시글 생성하기")
     @PostMapping
@@ -41,9 +42,10 @@ public class ArticleController {
     @Operation(summary = "게시글 상세조회하기")
     @GetMapping("/{articleId}")
     public ApiResponse<ArticleDetailResponse> getArticle(
+            @AuthenticationPrincipal Long userId,
             @PathVariable Long articleId) {
 
-        ArticleDetailResponse response = articleReadService.getArticle(articleId);
+        ArticleDetailResponse response = articleDetailService.getArticleDetail(articleId, userId);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.ARTICLE_DETAIL_SUCCESS.getMessage(), response);
     }
 
@@ -89,5 +91,12 @@ public class ArticleController {
     ) {
         ArticleScrollResponse response = articleService.readAllInfiniteScroll(userId, lastCreatedAt, limit, lastArticleId);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.MY_ARTICLE_SCROLL_SUCCESS.getMessage(), response);
+    }
+
+    @Operation(summary = "인기 게시글 조회(상위 10개)")
+    @GetMapping("/popular")
+    public ApiResponse<PopularArticleListResponse> getWeeklyPopularPosts() {
+        PopularArticleListResponse response = articleCacheService.getWeeklyPopularPosts();
+        return ApiResponse.success(HttpStatus.OK, ResponseMessage.POPULAR_ARTICLE_GET_SUCCESS.getMessage(), response);
     }
 }

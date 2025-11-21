@@ -2,6 +2,7 @@ package com.drawandyou.drawandyou_server.domain.article.domain.repository;
 
 import com.drawandyou.drawandyou_server.domain.article.domain.entity.QArticle;
 import com.drawandyou.drawandyou_server.domain.article.presentation.dto.response.ArticleResponse;
+import com.drawandyou.drawandyou_server.domain.article.presentation.dto.response.PopularArticleResponse;
 import com.drawandyou.drawandyou_server.domain.articleimage.domain.entity.QArticleImage;
 import com.drawandyou.drawandyou_server.domain.like.domain.entity.QArticleLikeCount;
 import com.drawandyou.drawandyou_server.domain.user.domain.entity.QUser;
@@ -61,5 +62,32 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
         }
         return article.createdAt.lt(lastCreatedAt)
                 .or(article.createdAt.eq(lastCreatedAt).and(article.id.lt(lastArticleId)));
+    }
+
+
+    @Override
+    public List<PopularArticleResponse> findTop10ByIdIn(List<Long> articleIds) {
+        if (articleIds == null || articleIds.isEmpty()) {
+            return List.of();
+        }
+
+        return queryFactory
+                .select(Projections.constructor(PopularArticleResponse.class,
+                        article.id,
+                        articleImage.imageUrl,
+                        article.title,
+                        user.username,
+                        user.profileImageUrl,
+                        // view count 는 redis 에서 관리
+                        Expressions.constant(0L),
+                        articleLikeCount.likeCount.coalesce(0L),
+                        article.createdAt
+                ))
+                .from(article)
+                .leftJoin(articleImage).on(articleImage.article.eq(article))
+                .leftJoin(user).on(article.user.eq(user))
+                .leftJoin(articleLikeCount).on(articleLikeCount.articleId.eq(article.id))
+                .where(article.id.in(articleIds))
+                .fetch();
     }
 }
