@@ -20,19 +20,19 @@ public class ArticleViewController {
 
     private final ArticleViewService articleViewService;
 
-    @Operation(summary = "게시글 조회수 증가")
-    @PostMapping("/articles/{articleId}")
-    public ApiResponse<ArticleViewCountResponse> increase(
-            @AuthenticationPrincipal Long userId,
-            @PathVariable Long articleId){
-        ArticleViewCountResponse response = articleViewService.increase(articleId, userId);
-        return ApiResponse.success(HttpStatus.OK, ResponseMessage.ARTICLE_VIEW_COUNT_INCREASEMENT_SUCCESS.getMessage(), response);
-    }
-
-    @Operation(summary = "게시글 조회수 조회")
-    @GetMapping("/articles/{articleId}/count")
-    public ApiResponse<ArticleViewCountResponse> count(@PathVariable Long articleId){
-        ArticleViewCountResponse response = articleViewService.count(articleId);
-        return ApiResponse.success(HttpStatus.OK, ResponseMessage.ARTICLE_VIEW_COUNT_GET_SUCCESS.getMessage(), response);
-    }
+//    @Operation(summary = "게시글 조회수 증가")
+//    @PostMapping("/articles/{articleId}")
+//    public ApiResponse<ArticleViewCountResponse> increase(
+//            @AuthenticationPrincipal Long userId,
+//            @PathVariable Long articleId){
+//        ArticleViewCountResponse response = articleViewService.increase(articleId, userId);
+//        return ApiResponse.success(HttpStatus.OK, ResponseMessage.ARTICLE_VIEW_COUNT_INCREASEMENT_SUCCESS.getMessage(), response);
+//    }
+//
+//    @Operation(summary = "게시글 조회수 조회")
+//    @GetMapping("/articles/{articleId}/count")
+//    public ApiResponse<ArticleViewCountResponse> count(@PathVariable Long articleId){
+//        ArticleViewCountResponse response = articleViewService.count(articleId);
+//        return ApiResponse.success(HttpStatus.OK, ResponseMessage.ARTICLE_VIEW_COUNT_GET_SUCCESS.getMessage(), response);
+//    }
 }
