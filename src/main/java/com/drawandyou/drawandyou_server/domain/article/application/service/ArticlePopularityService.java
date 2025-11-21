@@ -34,18 +34,16 @@ public class ArticlePopularityService {
      */
     public void incrementViewScore(Long articleId) {
         if (!isArticleWithinWeek(articleId)) {
-            return; // 일주일이 지난 게시글은 점수 증가 X
+            return; // 일주일이 지난 게시글은 pass
         }
 
         String key = getCurrentWeeklyKey();
-        double scoreIncrement = 1.0; // 조회 시 1점
+        double scoreIncrement = 1.0; // 조회 점수 1점
 
         redisTemplate.opsForZSet().incrementScore(key, articleId.toString(), scoreIncrement);
 
-        // 키 만료 시간 설정 (7일 + 1일 여유)
+        // ttl 설정 . 일주일이지만 하루 여유시간을 더 주자.
         redisTemplate.expire(key, Duration.ofDays(8));
-
-        log.debug("조회 점수 증가 - articleId: {}, score: +{}", articleId, scoreIncrement);
     }
 
     /**
@@ -57,12 +55,10 @@ public class ArticlePopularityService {
         }
 
         String key = getCurrentWeeklyKey();
-        double scoreIncrement = 3.0; // 좋아요 시 3점
+        double scoreIncrement = 3.0; // 좋아요 점수 3점
 
         redisTemplate.opsForZSet().incrementScore(key, articleId.toString(), scoreIncrement);
-        redisTemplate.expire(key, Duration.ofDays(8));
-
-        log.debug("좋아요 점수 증가 - articleId: {}, score: +{}", articleId, scoreIncrement);
+        redisTemplate.expire(key, Duration.ofDays(8)); // ttl 설정
     }
     
     /**
@@ -77,7 +73,6 @@ public class ArticlePopularityService {
             redisTemplate.opsForZSet().reverseRangeWithScores(key, 0, TOP_N - 1);
 
         if (topArticlesWithScores == null || topArticlesWithScores.isEmpty()) {
-            log.info("인기 게시글이 없습니다.");
             return Collections.emptyList();
         }
 
@@ -119,6 +114,7 @@ public class ArticlePopularityService {
         String cacheKey = ARTICLE_CREATED_TIME_KEY + articleId;
         String cached = redisTemplate.opsForValue().get(cacheKey);
 
+        // 캐시 hit
         if (cached != null) {
             return LocalDateTime.parse(cached);
         }
@@ -141,7 +137,6 @@ public class ArticlePopularityService {
      * 현재 주간 키 생성
      */
     private String getCurrentWeeklyKey() {
-        // 주 단위로 키를 구분하여 관리
         LocalDate now = LocalDate.now();
         LocalDate monday = now.minusDays(now.getDayOfWeek().getValue() - 1);
         return WEEKLY_POPULAR_KEY_PREFIX + monday;
