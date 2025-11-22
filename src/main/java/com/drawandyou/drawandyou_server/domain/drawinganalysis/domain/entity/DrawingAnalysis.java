@@ -29,13 +29,6 @@ public class DrawingAnalysis extends BaseEntity {
     @JoinColumn(name = "drawing_id")
     private Drawing drawing;
 
-    // 종합 분석 결과
-    @Column(columnDefinition = "TEXT")
-    private String totalAnalysis;
-
-    // 감정 상태
-    private String emotionStatus;
-
     // 분석 점수
     private Integer totalScore;
 
