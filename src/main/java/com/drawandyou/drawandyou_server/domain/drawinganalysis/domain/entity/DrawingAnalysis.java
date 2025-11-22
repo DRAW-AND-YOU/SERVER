@@ -29,17 +29,9 @@ public class DrawingAnalysis extends BaseEntity {
     @JoinColumn(name = "drawing_id")
     private Drawing drawing;
 
-    // 색상 분석 결과
+    // 종합 분석 결과
     @Column(columnDefinition = "TEXT")
-    private String colorAnalysis;
-
-    // 구도 분석 결과
-    @Column(columnDefinition = "TEXT")
-    private String compositionAnalysis;
-
-    // 선 분석 결과
-    @Column(columnDefinition = "TEXT")
-    private String lineAnalysis;
+    private String totalAnalysis;
 
     // 감정 상태
     private String emotionStatus;
@@ -55,6 +47,10 @@ public class DrawingAnalysis extends BaseEntity {
 
     // 세부 점수 - 후질문 점수
     private Integer questionScore;
+
+    // 분석 결과 텍스트
+    @Column(columnDefinition = "TEXT")
+    private String analysisResult;
 
     // AI 추천 결과 - 음악
     @ElementCollection
@@ -81,29 +77,23 @@ public class DrawingAnalysis extends BaseEntity {
     private List<PlaceRecommendationValue> placeRecommendations = new ArrayList<>();
 
     /**
-     * DrawingAnalysisResponse를 기반으로 DrawingAnalysis 엔티티를 생성
+     * ImageAnalysisDto를 기반으로 DrawingAnalysis 엔티티를 생성
      */
     public static DrawingAnalysis createAnalysis(
             Drawing drawing,
-            String colorAnalysis,
-            String compositionAnalysis,
-            String lineAnalysis,
-            String emotionStatus,
             Integer totalScore,
             Integer objectScore,
             Integer imageScore,
-            Integer questionScore
+            Integer questionScore,
+            String analysisResult
     ) {
         return DrawingAnalysis.builder()
                 .drawing(drawing)
-                .colorAnalysis(colorAnalysis)
-                .compositionAnalysis(compositionAnalysis)
-                .lineAnalysis(lineAnalysis)
-                .emotionStatus(emotionStatus)
                 .totalScore(totalScore)
                 .objectScore(objectScore)
                 .imageScore(imageScore)
                 .questionScore(questionScore)
+                .analysisResult(analysisResult)
                 .musicRecommendations(new ArrayList<>())
                 .videoRecommendations(new ArrayList<>())
                 .placeRecommendations(new ArrayList<>())

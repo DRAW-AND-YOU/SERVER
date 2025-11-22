@@ -10,10 +10,10 @@ public record DrawingAnalysisAndRecommendationResponse(
 
         // 심리 분석 결과
         Integer totalScore,
-        String colorAnalysis,
-        String compositionAnalysis,
-        String lineAnalysis,
-        String emotionStatus,
+        Integer objectScore,
+        Integer imageScore,
+        Integer questionScore,
+        String analysisResult,
 
         // AI 추천 결과
         List<MusicRecommendation> musicRecommendations,
@@ -22,27 +22,29 @@ public record DrawingAnalysisAndRecommendationResponse(
 ) {
 
     /**
-     * DrawingAnalysisResponse와 ContentRecommendationResponse를 합쳐서 최종 응답을 생성합니다.
+     * FastApiRecommendResponse를 사용하여 최종 응답을 생성합니다.
      */
     public static DrawingAnalysisAndRecommendationResponse toResponse(
             Long drawingId,
             String drawingTitle,
             String drawingImageUrl,
-            DrawingAnalysisResponse analysisResponse,
-            ContentRecommendationResponse recommendationResponse
+            FastApiRecommendResponse fastApiResponse
     ) {
+        ImageAnalysisDto imageAnalysis = fastApiResponse.imageAnalysis();
+        ContentRecommendationDto contentRecommendation = fastApiResponse.contentRecommendation();
+
         return new DrawingAnalysisAndRecommendationResponse(
                 drawingId,
                 drawingTitle,
                 drawingImageUrl,
-                analysisResponse.totalScore(),
-                analysisResponse.colorAnalysis(),
-                analysisResponse.compositionAnalysis(),
-                analysisResponse.lineAnalysis(),
-                analysisResponse.emotionStatus(),
-                recommendationResponse.music(),
-                recommendationResponse.video(),
-                recommendationResponse.place()
+                imageAnalysis.totalScore(),
+                imageAnalysis.objectScore(),
+                imageAnalysis.imageScore(),
+                imageAnalysis.questionScore(),
+                imageAnalysis.analysisResult(),
+                contentRecommendation.music(),
+                contentRecommendation.video(),
+                contentRecommendation.place()
         );
     }
 }

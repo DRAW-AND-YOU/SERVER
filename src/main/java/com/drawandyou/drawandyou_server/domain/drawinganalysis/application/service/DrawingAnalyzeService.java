@@ -2,12 +2,10 @@ package com.drawandyou.drawandyou_server.domain.drawinganalysis.application.serv
 
 import com.drawandyou.drawandyou_server.domain.drawing.domain.entity.Drawing;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.domain.entity.DrawingAnalysis;
-import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.DetailedScores;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.request.ContentRecommendRequest;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.request.DrawingAnalysisRequest;
-import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.response.ContentRecommendationResponse;
+import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.response.FastApiRecommendResponse;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.response.DrawingAnalysisAndRecommendationResponse;
-import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.response.DrawingAnalysisResponse;
 import com.drawandyou.drawandyou_server.domain.user.application.service.UserFindService;
 import com.drawandyou.drawandyou_server.domain.user.domain.entity.User;
 import com.drawandyou.drawandyou_server.global.client.fastapi.FastApiClient;
@@ -41,48 +39,20 @@ public class DrawingAnalyzeService {
         // 1. Drawing 엔티티 생성 (메모리만, 저장 X)
         Drawing drawing = Drawing.createDrawing(user, title, imageUrl);
 
-        // 2. 외부 API 호출 (트랜잭션 밖에서 실행)
-        // TODO: 실제로는 FastAPI 이미지 분석 비동기 호출
-        DrawingAnalysisResponse drawingAnalysisResponse = createDummyDrawingAnalysisResponse();
+        ContentRecommendRequest contentRecommendRequest = ContentRecommendRequest.from(drawingAnalysisRequest);
 
-        ContentRecommendRequest contentRecommendRequest = new ContentRecommendRequest(
-                drawingAnalysisResponse.totalScore(),
-                drawingAnalysisResponse.detailedScores(),
-                drawingAnalysisRequest.latitude(),
-                drawingAnalysisRequest.longitude()
-        );
-
-        ContentRecommendationResponse contentRecommendationResponse =
+        FastApiRecommendResponse fastApiResponse =
                 fastApiClient.getContentRecommendationsSync(contentRecommendRequest);
 
         // 3. 외부 API 호출 성공 후, 트랜잭션 서비스를 통해 모든 엔티티 저장
-        DrawingAnalysis drawingAnalysis = transactionService.saveDrawingWithAnalysis(drawing, drawingAnalysisResponse, contentRecommendationResponse);
+        DrawingAnalysis drawingAnalysis = transactionService.saveDrawingWithAnalysis(drawing, fastApiResponse);
 
         // 최종 응답 생성
         return DrawingAnalysisAndRecommendationResponse.toResponse(
                 drawingAnalysis.getDrawing().getId(),
                 title,
                 imageUrl,
-                drawingAnalysisResponse,
-                contentRecommendationResponse
+                fastApiResponse
         );
     }
-
-    /**
-     * 더미 DrawingAnalysisResponse를 생성합니다.
-     * TODO: 실제로는 FastAPI로부터 받아온 데이터를 사용해야 합니다.
-     */
-    private DrawingAnalysisResponse createDummyDrawingAnalysisResponse() {
-        DetailedScores detailedScores = new DetailedScores(40, 40, 20);
-
-        return new DrawingAnalysisResponse(
-                "따뜻한 색상이 주를 이루며, 안정감을 주는 색상 조합입니다.",  // colorAnalysis
-                "중앙에 주요 객체가 배치되어 균형잡힌 구도를 보여줍니다.",    // compositionAnalysis
-                "부드러운 선이 특징적이며, 편안한 느낌을 전달합니다.",        // lineAnalysis
-                "안정 / 행복",                                             // emotionStatus
-                100,                                                      // totalScore
-                detailedScores                                            // detailedScores
-        );
-    }
-
 }

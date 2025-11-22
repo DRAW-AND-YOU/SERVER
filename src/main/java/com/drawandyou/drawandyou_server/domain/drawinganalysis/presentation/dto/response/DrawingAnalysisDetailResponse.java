@@ -16,10 +16,7 @@ public record DrawingAnalysisDetailResponse(
 
         // 심리 분석 결과
         Integer totalScore,
-        String colorAnalysis,
-        String compositionAnalysis,
-        String lineAnalysis,
-        String emotionStatus,
+        String analysisResult,
 
         // AI 추천 결과
         List<MusicRecommendationValue> musicRecommendations,
@@ -35,10 +32,7 @@ public record DrawingAnalysisDetailResponse(
                 drawing.getTitle(),
                 drawing.getImageUrl(),
                 drawingAnalysis.getTotalScore(),
-                drawingAnalysis.getColorAnalysis(),
-                drawingAnalysis.getCompositionAnalysis(),
-                drawingAnalysis.getLineAnalysis(),
-                drawingAnalysis.getEmotionStatus(),
+                drawingAnalysis.getAnalysisResult(),
                 drawingAnalysis.getMusicRecommendations(),
                 drawingAnalysis.getVideoRecommendations(),
                 drawingAnalysis.getPlaceRecommendations()
