@@ -1,9 +1,8 @@
 package com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.request;
 
+import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.enums.TestImageType;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.URL;
 
 import java.util.List;
@@ -17,6 +16,10 @@ public record DrawingAnalysisRequest(
         @NotBlank(message = "그림의 제목은 필수입니다.")
         String title,
 
+        @NotNull(message = "테스트 타입은 필수입니다.")
+        @Min(value = 1) @Max(value = 4)
+        TestImageType imageType,
+
         @NotNull(message = "사용자의 위도 값은 필수입니다.")
         Double latitude,
 
@@ -25,17 +28,11 @@ public record DrawingAnalysisRequest(
 
         @NotEmpty(message = "후질문 정보는 최소 1개 이상이어야 합니다.")
         @Valid
-        List<FollowUpQuestion> followUpQuestions
+        List<String> followUpQuestions
 ) {
 
     /**
      * 후질문과 사용자의 답변을 담는 레코드
      */
-    public record FollowUpQuestion(
-            @NotBlank(message = "질문 내용은 필수입니다.")
-            String question,
 
-            @NotBlank(message = "답변 내용은 필수입니다.")
-            String answer
-    ) {}
 }
