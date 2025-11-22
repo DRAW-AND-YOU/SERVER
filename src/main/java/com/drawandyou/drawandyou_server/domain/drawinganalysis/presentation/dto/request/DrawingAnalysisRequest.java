@@ -17,7 +17,6 @@ public record DrawingAnalysisRequest(
         String title,
 
         @NotNull(message = "테스트 타입은 필수입니다.")
-        @Min(value = 1) @Max(value = 4)
         TestImageType imageType,
 
         @NotNull(message = "사용자의 위도 값은 필수입니다.")
