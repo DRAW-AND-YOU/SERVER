@@ -32,7 +32,7 @@ public class FastApiClient {
     }
 
     /**
-     * FastAPI의 /recommend 엔드포인트를 동기적으로 호출합니다.
+     * FastAPI의 /recommendation 엔드포인트를 동기적으로 호출합니다.
      *
      * @param request 콘텐츠 추천 요청 정보
      * @return FastAPI 응답 (그림 분석 결과 + 콘텐츠 추천)
