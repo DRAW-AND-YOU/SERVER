@@ -24,7 +24,7 @@ public class ArticleLikeService {
 
     public ArticleLikeResponse read(Long articleId, Long userId) {
         boolean isLiked = articleLikeRepository.existsByArticleIdAndUserId(articleId, userId);
-        return ArticleLikeResponse.of(userId, isLiked);
+        return ArticleLikeResponse.from(isLiked);
     }
 
     // update 시점에만 쓰기 락 잡기
