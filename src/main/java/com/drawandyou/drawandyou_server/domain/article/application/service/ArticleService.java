@@ -73,12 +73,6 @@ public class ArticleService {
         }
         // 검증 성공시 수정 가능
         article.updateTitleAndContent(request.title(), request.content());
-
-        // 이미지도 update
-        // 이미지 수정 요청이 존재한다면 이미지도 갈아끼우기
-        if (request.imageUrl() != null){
-            updateArticleImage(request.imageUrl(), article);
-        }
     }
 
     @Transactional
@@ -98,12 +92,6 @@ public class ArticleService {
 
         // 이후, 게시글 삭제
         articleRepository.delete(article);
-    }
-
-    private void updateArticleImage(String toUpdateImageUrl, Article article) {
-        ArticleImage articleImage = articleImageRepository.findByArticle(article);
-        articleImageRepository.delete(articleImage);
-        articleImageRepository.save(ArticleImage.create(article , toUpdateImageUrl));
     }
 
     @Transactional(readOnly = true)
