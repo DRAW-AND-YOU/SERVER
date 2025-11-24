@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 public record ArticleResponse(
         Long articleId,
         String imageUrl,
+        String title,
         String authorName,
         Long viewCount,
         Long likeCount,

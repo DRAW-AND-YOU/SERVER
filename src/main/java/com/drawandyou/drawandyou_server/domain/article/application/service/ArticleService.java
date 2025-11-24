@@ -111,6 +111,7 @@ public class ArticleService {
                 .map(article -> new ArticleResponse(
                         article.articleId(),
                         article.imageUrl(),
+                        article.title(),
                         article.authorName(),
                         viewCountMap.getOrDefault(article.articleId(), 0L),
                         article.likeCount(),
