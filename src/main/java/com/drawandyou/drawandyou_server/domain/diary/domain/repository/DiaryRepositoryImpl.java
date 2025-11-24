@@ -34,8 +34,8 @@ public class DiaryRepositoryImpl implements DiaryRepositoryCustom {
                 ))
                 .from(diary)
                 .where(diary.authorId.eq(userId)
-                        .and(diary.writtenAt.after(startDateTime))
-                        .and(diary.writtenAt.before(endDateTime)))
+                        .and(diary.writtenAt.goe(startDateTime))
+                        .and(diary.writtenAt.loe(endDateTime)))
                 .fetch();
 
         return new DiaryCalendarResponse(results);

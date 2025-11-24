@@ -46,7 +46,7 @@ public class DiaryController {
     }
 
     @Operation(summary = "일기 삭제")
-    @DeleteMapping("{diaryId}")
+    @DeleteMapping("/{diaryId}")
     public ApiResponse<Void> deleteDiary(
             @AuthenticationPrincipal Long userId,
             @PathVariable Long diaryId) {
