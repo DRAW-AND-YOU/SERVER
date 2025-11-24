@@ -2,6 +2,8 @@ package com.drawandyou.drawandyou_server.global.client.fastapi;
 
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.request.ContentRecommendRequest;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.response.FastApiRecommendResponse;
+import com.drawandyou.drawandyou_server.global.client.fastapi.dto.request.DiaryImageRequest;
+import com.drawandyou.drawandyou_server.global.client.fastapi.dto.response.DiaryImageResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -43,6 +45,37 @@ public class FastApiClient {
         } catch (Exception e) {
             log.error("Content Recommendation 동기 호출 실패", e);
             throw new RuntimeException("Content Recommendation 호출 중 오류가 발생했습니다: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * FastAPI의 /diary/image 엔드포인트를 호출하여 일기 기반 이미지를 생성합니다.
+     *
+     * @param request 일기 이미지 생성 요청 정보 (키워드, 제목, 내용)
+     * @return FastAPI 응답 (생성된 이미지 URL)
+     */
+    public Mono<DiaryImageResponse> generateDiaryImage(DiaryImageRequest request) {
+        return webClient.post()
+                .uri("/diary/image")
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(DiaryImageResponse.class)
+                .doOnSuccess(response -> log.info("Diary Image 생성 응답 성공: {}", response))
+                .doOnError(error -> log.error("Diary Image 생성 호출 실패", error));
+    }
+
+    /**
+     * FastAPI의 /diary/image 엔드포인트를 동기적으로 호출합니다.
+     *
+     * @param request 일기 이미지 생성 요청 정보
+     * @return FastAPI 응답 (생성된 이미지 URL)
+     */
+    public DiaryImageResponse generateDiaryImageSync(DiaryImageRequest request) {
+        try {
+            return generateDiaryImage(request).block();
+        } catch (Exception e) {
+            log.error("Diary Image 생성 동기 호출 실패", e);
+            throw new RuntimeException("Diary Image 생성 호출 중 오류가 발생했습니다: " + e.getMessage(), e);
         }
     }
 }
