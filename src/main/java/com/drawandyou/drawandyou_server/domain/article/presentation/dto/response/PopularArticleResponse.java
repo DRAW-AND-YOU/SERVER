@@ -10,6 +10,7 @@ public record PopularArticleResponse(
         String authorImageUrl,
         Long viewCount,
         Long likeCount,
+        Long commentCount,
         LocalDateTime createdAt
 ) {
 }

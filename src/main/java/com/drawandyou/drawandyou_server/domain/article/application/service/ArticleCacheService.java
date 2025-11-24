@@ -42,6 +42,7 @@ public class ArticleCacheService {
                         article.authorImageUrl(),
                         viewCountMap.getOrDefault(article.articleId(), 0L),
                         article.likeCount(),
+                        article.commentCount(),
                         article.createdAt()
                 ))
                 .toList();

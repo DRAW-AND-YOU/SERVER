@@ -4,6 +4,7 @@ import com.drawandyou.drawandyou_server.domain.article.domain.entity.QArticle;
 import com.drawandyou.drawandyou_server.domain.article.presentation.dto.response.ArticleResponse;
 import com.drawandyou.drawandyou_server.domain.article.presentation.dto.response.PopularArticleResponse;
 import com.drawandyou.drawandyou_server.domain.articleimage.domain.entity.QArticleImage;
+import com.drawandyou.drawandyou_server.domain.comment.domain.entity.QArticleCommentCount;
 import com.drawandyou.drawandyou_server.domain.like.domain.entity.QArticleLikeCount;
 import com.drawandyou.drawandyou_server.domain.user.domain.entity.QUser;
 import com.querydsl.core.types.Projections;
@@ -27,6 +28,7 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
     private final QArticleImage articleImage = QArticleImage.articleImage;
     private final QUser user = QUser.user;
     private final QArticleLikeCount articleLikeCount = QArticleLikeCount.articleLikeCount;
+    private final QArticleCommentCount articleCommentCount = QArticleCommentCount.articleCommentCount;
 
     @Override
     public List<ArticleResponse> findAllInfiniteScroll(Long userId, Long limit, LocalDateTime lastCreatedAt, Long lastArticleId) {
@@ -34,6 +36,7 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
                 .select(Projections.constructor(ArticleResponse.class,
                         article.id,
                         articleImage.imageUrl,
+                        article.title,
                         user.username,
                         Expressions.constant(0L), // 조회수는 redis 에 저장된 데이터를 사용한다.
                         articleLikeCount.likeCount.coalesce(0L),
@@ -81,12 +84,14 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
                         // view count 는 redis 에서 관리
                         Expressions.constant(0L),
                         articleLikeCount.likeCount.coalesce(0L),
+                        articleCommentCount.commentCount.coalesce(0L),
                         article.createdAt
                 ))
                 .from(article)
                 .leftJoin(articleImage).on(articleImage.article.eq(article))
                 .leftJoin(user).on(article.user.eq(user))
                 .leftJoin(articleLikeCount).on(articleLikeCount.articleId.eq(article.id))
+                .leftJoin(articleCommentCount).on(articleCommentCount.articleId.eq(article.id))
                 .where(article.id.in(articleIds))
                 .fetch();
     }
