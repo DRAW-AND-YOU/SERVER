@@ -22,6 +22,8 @@ public class TherapyProgramFindService {
     private final DailyCourseRepository dailyCourseRepository;
     private final UserFindService userFindService;
 
+    private static final int DEFAULT_TOTAL_DAYS = 5;
+
     public OngoingProgramResponse getOngoingProgramInfo(Long userId) {
         User user = userFindService.findUser(userId);
 
@@ -29,7 +31,7 @@ public class TherapyProgramFindService {
         Optional<TherapyProgram> therapyProgramOpt = therapyProgramRepository.findByUserAndIsFinished(user, isProgramFinished);
        // 유저가 참여한 종료되지 않은 치유 프로그램이 존재하지 않는다면, early return
         if (therapyProgramOpt.isEmpty()){
-            return new OngoingProgramResponse(0,5,null, false);
+            return new OngoingProgramResponse(0,DEFAULT_TOTAL_DAYS,null, false);
         }
 
         TherapyProgram therapyProgram = therapyProgramOpt.get();
