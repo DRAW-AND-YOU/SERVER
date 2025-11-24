@@ -41,6 +41,12 @@ public class DiaryService {
     @Transactional
     public void delete(Long userId, Long diaryId) {
 
+        Diary diary = findDiaryAndVerifyOwner(userId, diaryId);
+
+        diaryRepository.delete(diary);
+    }
+
+    private Diary findDiaryAndVerifyOwner(Long userId, Long diaryId) {
         Diary diary = diaryRepository.findById(diaryId)
                 .orElseThrow(DiaryNotFoundException::new);
 
@@ -48,19 +54,12 @@ public class DiaryService {
         if (!diary.getAuthorId().equals(userId)){
             throw new NotDiaryOwnerException();
         }
-
-        diaryRepository.delete(diary);
+        return diary;
     }
 
     public DiaryResponse getDiary(Long userId, Long diaryId) {
 
-        Diary diary = diaryRepository.findById(diaryId)
-                .orElseThrow(DiaryNotFoundException::new);
-
-        // user 의 diary 소유권 검증. 타인이 작성한 일기는 조회 불가능.
-        if (!diary.getAuthorId().equals(userId)){
-            throw new NotDiaryOwnerException();
-        }
+        Diary diary = findDiaryAndVerifyOwner(userId, diaryId);
         return DiaryResponse.from(diary);
     }
 
