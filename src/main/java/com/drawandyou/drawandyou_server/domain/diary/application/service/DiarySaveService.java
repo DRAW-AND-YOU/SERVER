@@ -22,21 +22,15 @@ public class DiarySaveService {
     @Transactional
     public Diary save(Long userId, DiaryCreateRequest request, DiaryImageResponse response) {
 
-        // writtenAt을 기준으로, 동일한 날짜에 작성한 일기가 있다면 예외 던지기
-        LocalDateTime startOfDay = request.writtenAt().toLocalDate().atStartOfDay();
-        LocalDateTime startOfNextDay = request.writtenAt().toLocalDate().plusDays(1).atStartOfDay();
-
-        boolean diaryExists = diaryRepository.existsByUserIdAndWrittenAtBetween(userId, startOfDay, startOfNextDay);
-        if (diaryExists){
-            throw new DiaryExistsException();
-        }
-
         Diary diary = Diary.create(userId, request.title(), request.content(),
                 response.imageUrl(), request.writtenAt(), request.keyword());
 
         return diaryRepository.save(diary);
     }
 
+    /**
+     * TODO : 테스트용 메소드, 추후 제거 예정
+     */
     @Transactional
     public Diary save(Long userId, DiaryCreateRequest request) {
 
