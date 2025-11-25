@@ -2,6 +2,7 @@ package com.drawandyou.drawandyou_server.domain.diary.application.service;
 
 import com.drawandyou.drawandyou_server.domain.diary.domain.entity.Diary;
 import com.drawandyou.drawandyou_server.domain.diary.domain.repository.DiaryRepository;
+import com.drawandyou.drawandyou_server.domain.diary.exception.DiaryExistsException;
 import com.drawandyou.drawandyou_server.domain.diary.exception.DiaryNotFoundException;
 import com.drawandyou.drawandyou_server.domain.diary.exception.NotDiaryOwnerException;
 import com.drawandyou.drawandyou_server.domain.diary.presentation.dto.request.DiaryCreateRequest;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +33,15 @@ public class DiaryService {
         // 1. fast api client 에 keyword, title, content 넘겨준다.
         // 2. fast api 에서 이미지 생성 및 S3 에 업로드 . 생성한 imageUrl 을 반환
 
+        // writtenAt을 기준으로, 동일한 날짜에 작성한 일기가 있다면 예외 던지기
+        LocalDateTime startOfDay = request.writtenAt().toLocalDate().atStartOfDay();
+        LocalDateTime startOfNextDay = request.writtenAt().toLocalDate().plusDays(1).atStartOfDay();
+
+        boolean diaryExists = diaryRepository.existsByUserIdAndWrittenAtBetween(userId, startOfDay, startOfNextDay);
+        if (diaryExists){
+            throw new DiaryExistsException();
+        }
+
         DiaryImageRequest diaryImageRequest = new DiaryImageRequest(request.keyword().getMessage(), request.title(), request.content());
         DiaryImageResponse imageResponse = fastApiClient.generateDiaryImageSync(diaryImageRequest);
         // diary 저장은 트랜잭션 내부에서 수행
@@ -42,7 +53,6 @@ public class DiaryService {
     public void delete(Long userId, Long diaryId) {
 
         Diary diary = findDiaryAndVerifyOwner(userId, diaryId);
-
         diaryRepository.delete(diary);
     }
 
