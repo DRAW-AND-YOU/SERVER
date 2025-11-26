@@ -2,8 +2,8 @@ package com.drawandyou.drawandyou_server.domain.therapyprogram.presentation.dto.
 
 import java.util.List;
 
-public record
+public record 
 ParticipatedProgramIdResponse(
-        List<Long> therapyProgramIds
+        List<TherapyProgramInfoResponse> therapyProgramInfos
 ) {
 }

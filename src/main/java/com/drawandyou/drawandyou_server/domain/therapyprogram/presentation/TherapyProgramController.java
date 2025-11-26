@@ -47,10 +47,10 @@ public class TherapyProgramController {
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.THERAPY_PROGRAM_SCORES_GET_SUCCESS.getMessage(), response);
     }
 
-    @Operation(summary = "유저가 참가완료 한 치유프로그램 id 조회")
+    @Operation(summary = "유저가 참가완료 한 치유프로그램 정보 조회")
     @GetMapping("/participated")
-    public ApiResponse<ParticipatedProgramIdResponse> getTherapyProgramIds(@AuthenticationPrincipal Long userId){
-        ParticipatedProgramIdResponse response = therapyProgramFindService.getTherapyProgramIds(userId);
+    public ApiResponse<ParticipatedProgramIdResponse> getTherapyProgramInfos(@AuthenticationPrincipal Long userId){
+        ParticipatedProgramIdResponse response = therapyProgramFindService.getTherapyProgramInfos(userId);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.THERAPY_PROGRAM_IDS_GET_SUCCESS.getMessage(), response);
     }
 

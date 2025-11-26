@@ -7,6 +7,7 @@ import com.drawandyou.drawandyou_server.domain.therapyprogram.domain.repository.
 import com.drawandyou.drawandyou_server.domain.therapyprogram.exception.TherapyProgramNotFoundException;
 import com.drawandyou.drawandyou_server.domain.therapyprogram.presentation.dto.response.OngoingProgramResponse;
 import com.drawandyou.drawandyou_server.domain.therapyprogram.presentation.dto.response.ParticipatedProgramIdResponse;
+import com.drawandyou.drawandyou_server.domain.therapyprogram.presentation.dto.response.TherapyProgramInfoResponse;
 import com.drawandyou.drawandyou_server.domain.user.application.service.UserFindService;
 import com.drawandyou.drawandyou_server.domain.user.domain.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -50,13 +51,10 @@ public class TherapyProgramFindService {
         return new OngoingProgramResponse(therapyProgram.getId(), completeCourseCount, therapyProgram.getTotalDays(), currentDailyCourseId, true);
     }
 
-    public ParticipatedProgramIdResponse getTherapyProgramIds(Long userId) {
+    public ParticipatedProgramIdResponse getTherapyProgramInfos(Long userId) {
         User user = userFindService.findUser(userId);
-        List<Long> therapyProgramIds = therapyProgramRepository.findTherapyProgramsByUserAndIsFinished(user, true)
-                .stream()
-                .map(TherapyProgram::getId)
-                .toList();
+        List<TherapyProgramInfoResponse> infos = therapyProgramRepository.findTherapyProgramsByUserAndIsFinished(user, true);
 
-        return new ParticipatedProgramIdResponse(therapyProgramIds);
+        return new ParticipatedProgramIdResponse(infos);
     }
 }
