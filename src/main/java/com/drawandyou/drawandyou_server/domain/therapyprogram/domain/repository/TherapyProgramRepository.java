@@ -16,4 +16,6 @@ public interface TherapyProgramRepository extends JpaRepository<TherapyProgram, 
     Optional<TherapyProgram> findByUserAndIsFinished(User user, boolean isFinished);
 
     boolean existsByUserAndIsFinished(User user, boolean isFinished);
+
+    List<TherapyProgram> findTherapyProgramsByUserAndIsFinished(User user, boolean isFinished);
 }
