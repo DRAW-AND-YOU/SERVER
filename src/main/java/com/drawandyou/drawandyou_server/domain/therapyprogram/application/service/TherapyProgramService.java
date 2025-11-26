@@ -3,10 +3,14 @@ package com.drawandyou.drawandyou_server.domain.therapyprogram.application.servi
 import com.drawandyou.drawandyou_server.domain.dailycourse.domain.entity.DailyCourse;
 import com.drawandyou.drawandyou_server.domain.dailycourse.domain.entity.enums.CourseType;
 import com.drawandyou.drawandyou_server.domain.dailycourse.domain.repository.DailyCourseRepository;
+import com.drawandyou.drawandyou_server.domain.dailycourse.presentation.dto.DailyCourseScoreResponse;
 import com.drawandyou.drawandyou_server.domain.therapyprogram.domain.entity.TherapyProgram;
 import com.drawandyou.drawandyou_server.domain.therapyprogram.domain.repository.TherapyProgramRepository;
 import com.drawandyou.drawandyou_server.domain.therapyprogram.exception.AlreadyParticipateInProgramException;
+import com.drawandyou.drawandyou_server.domain.therapyprogram.exception.NotAllCoursesCompletedException;
+import com.drawandyou.drawandyou_server.domain.therapyprogram.exception.TherapyProgramAccessDeniedException;
 import com.drawandyou.drawandyou_server.domain.therapyprogram.exception.TherapyProgramNotFoundException;
+import com.drawandyou.drawandyou_server.domain.therapyprogram.presentation.dto.response.TherapyProgramScoreResponse;
 import com.drawandyou.drawandyou_server.domain.user.application.service.UserFindService;
 import com.drawandyou.drawandyou_server.domain.user.domain.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -83,5 +88,36 @@ public class TherapyProgramService {
         therapyProgram.changeStatusToFinish();
         // 치유 프로그램의 종료 날짜를 현재 시점으로 설정
         therapyProgram.assignEndDate();
+    }
+
+    public TherapyProgramScoreResponse getTherapyProgramScores(Long userId, Long therapyProgramId) {
+        TherapyProgram therapyProgram = therapyProgramRepository.findById(therapyProgramId)
+                .orElseThrow(TherapyProgramAccessDeniedException::new);
+
+        validateUserOwnerShip(userId, therapyProgram);
+        List<DailyCourseScoreResponse> scoreResponses = dailyCourseRepository.findScoresByTherapyProgramId(therapyProgramId);
+        return new TherapyProgramScoreResponse(scoreResponses);
+    }
+
+    private static void validateUserOwnerShip(Long userId, TherapyProgram therapyProgram) {
+        if (!therapyProgram.getUser().getId().equals(userId)){
+            throw new TherapyProgramAccessDeniedException();
+        }
+    }
+
+    @Transactional
+    public void completeTherapyProgram(Long userId, Long therapyProgramId) {
+        TherapyProgram therapyProgram = therapyProgramRepository.findById(therapyProgramId)
+                .orElseThrow(TherapyProgramNotFoundException::new);
+
+        // 소유권 검증
+        validateUserOwnerShip(userId, therapyProgram);
+        // 모든 데일리 코스가 완료되었는지 확인
+        int completedCount = dailyCourseRepository.countByTherapyProgramAndIsCompleted(therapyProgram, true);
+        if (completedCount < TOTAL_DAILY_COURSE_COUNT) {
+            throw new NotAllCoursesCompletedException();
+        }
+
+        therapyProgram.changeStatusToFinish();
     }
 }

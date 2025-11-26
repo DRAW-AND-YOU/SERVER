@@ -9,7 +9,9 @@ public enum ResponseMessage {
 
     THERAPY_PROGRAM_ENROLL_SUCCESS("치유 프로그램 등록에 성공하였습니다."),
     THERAPY_PROGRAM_COMPLETE_SUCCESS("치유 프로그램의 모든 코스 완주에 성공했습니다."),
-    ONGOING_PROGRAM_INFO_GET_SUCCESS("진행중인 프로그램 정보 조회에 성공했습니다.");
+    ONGOING_PROGRAM_INFO_GET_SUCCESS("진행중인 프로그램 정보 조회에 성공했습니다."),
+    THERAPY_PROGRAM_SCORES_GET_SUCCESS("치유 프로그램의 점수 변화 조회에 성공했습니다."),
+    THERAPY_PROGRAM_IDS_GET_SUCCESS("유저가 참여 완료한 치유 프로그램 id 리스트 조회에 성공했습니다.");
 
     private final String message;
 }

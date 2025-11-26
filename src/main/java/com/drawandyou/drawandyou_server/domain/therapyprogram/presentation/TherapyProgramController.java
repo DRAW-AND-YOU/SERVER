@@ -3,6 +3,8 @@ package com.drawandyou.drawandyou_server.domain.therapyprogram.presentation;
 import com.drawandyou.drawandyou_server.domain.therapyprogram.application.service.TherapyProgramFindService;
 import com.drawandyou.drawandyou_server.domain.therapyprogram.application.service.TherapyProgramService;
 import com.drawandyou.drawandyou_server.domain.therapyprogram.presentation.dto.response.OngoingProgramResponse;
+import com.drawandyou.drawandyou_server.domain.therapyprogram.presentation.dto.response.ParticipatedProgramIdResponse;
+import com.drawandyou.drawandyou_server.domain.therapyprogram.presentation.dto.response.TherapyProgramScoreResponse;
 import com.drawandyou.drawandyou_server.domain.therapyprogram.presentation.message.ResponseMessage;
 import com.drawandyou.drawandyou_server.global.common.response.ApiResponse;
 
@@ -35,4 +37,30 @@ public class TherapyProgramController {
         OngoingProgramResponse response = therapyProgramFindService.getOngoingProgramInfo(userId);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.ONGOING_PROGRAM_INFO_GET_SUCCESS.getMessage(), response);
     }
+
+    @Operation(summary = "치유 프로그램과 관련된 이미지 및 점수 변화 조회")
+    @GetMapping("/{therapyProgramId}/scores")
+    public ApiResponse<TherapyProgramScoreResponse> getTherapyProgramScores(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long therapyProgramId){
+        TherapyProgramScoreResponse response = therapyProgramService.getTherapyProgramScores(userId, therapyProgramId);
+        return ApiResponse.success(HttpStatus.OK, ResponseMessage.THERAPY_PROGRAM_SCORES_GET_SUCCESS.getMessage(), response);
+    }
+
+    @Operation(summary = "유저가 참가완료 한 치유프로그램 정보 조회")
+    @GetMapping("/participated")
+    public ApiResponse<ParticipatedProgramIdResponse> getTherapyProgramInfos(@AuthenticationPrincipal Long userId){
+        ParticipatedProgramIdResponse response = therapyProgramFindService.getTherapyProgramInfos(userId);
+        return ApiResponse.success(HttpStatus.OK, ResponseMessage.THERAPY_PROGRAM_IDS_GET_SUCCESS.getMessage(), response);
+    }
+
+    @Operation(summary = "치유 프로그램 완주하기")
+    @PatchMapping("/{therapyProgramId}/complete")
+    public ApiResponse<Void> completeTherapyProgram(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long therapyProgramId){
+        therapyProgramService.completeTherapyProgram(userId, therapyProgramId);
+        return ApiResponse.success(HttpStatus.OK, ResponseMessage.THERAPY_PROGRAM_COMPLETE_SUCCESS.getMessage());
+    }
+
 }
