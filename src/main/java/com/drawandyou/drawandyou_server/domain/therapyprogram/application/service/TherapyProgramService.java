@@ -9,6 +9,7 @@ import com.drawandyou.drawandyou_server.domain.drawinganalysis.domain.repository
 import com.drawandyou.drawandyou_server.domain.therapyprogram.domain.entity.TherapyProgram;
 import com.drawandyou.drawandyou_server.domain.therapyprogram.domain.repository.TherapyProgramRepository;
 import com.drawandyou.drawandyou_server.domain.therapyprogram.exception.AlreadyParticipateInProgramException;
+import com.drawandyou.drawandyou_server.domain.therapyprogram.exception.NotAllCoursesCompletedException;
 import com.drawandyou.drawandyou_server.domain.therapyprogram.exception.TherapyProgramNotFoundException;
 import com.drawandyou.drawandyou_server.domain.therapyprogram.presentation.dto.response.OngoingProgramResponse;
 import com.drawandyou.drawandyou_server.domain.therapyprogram.presentation.dto.response.ParticipatedProgramIdResponse;
@@ -102,6 +103,12 @@ public class TherapyProgramService {
     public void completeTherapyProgram(Long userId, Long therapyProgramId) {
         TherapyProgram therapyProgram = therapyProgramRepository.findById(therapyProgramId)
                 .orElseThrow(TherapyProgramNotFoundException::new);
+
+        // 모든 데일리 코스가 완료되었는지 확인
+        int completedCount = dailyCourseRepository.countByTherapyProgramAndIsCompleted(therapyProgram, true);
+        if (completedCount < TOTAL_DAILY_COURSE_COUNT) {
+            throw new NotAllCoursesCompletedException();
+        }
 
         therapyProgram.changeStatusToFinish();
     }
