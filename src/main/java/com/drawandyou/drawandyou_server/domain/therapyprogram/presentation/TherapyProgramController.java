@@ -38,7 +38,7 @@ public class TherapyProgramController {
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.ONGOING_PROGRAM_INFO_GET_SUCCESS.getMessage(), response);
     }
 
-    @Operation(summary = "치유 프로그램의 점수 변화 조회")
+    @Operation(summary = "치유 프로그램과 관련된 이미지 및 점수 변화 조회")
     @GetMapping("/{therapyProgramId}/scores")
     public ApiResponse<TherapyProgramScoreResponse> getTherapyProgramScores(
             @AuthenticationPrincipal Long userId,

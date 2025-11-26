@@ -17,7 +17,7 @@ public interface DailyCourseRepository extends JpaRepository<DailyCourse, Long> 
     Optional<DailyCourse> findFirstByTherapyProgramAndIsCompletedOrderByCurrentDayAsc(TherapyProgram therapyProgram, boolean b);
 
     @Query("SELECT new com.drawandyou.drawandyou_server.domain.dailycourse.presentation.dto.DailyCourseScoreResponse(" +
-         "dc.id, dc.currentDay, da.totalScore) " +
+         "dc.id, dc.drawing.imageUrl, dc.currentDay, da.totalScore ) " +
          "FROM DailyCourse dc " +
          "LEFT JOIN DrawingAnalysis da ON da.drawing.id = dc.drawing.id " +
          "WHERE dc.therapyProgram.id = :therapyProgramId " +
