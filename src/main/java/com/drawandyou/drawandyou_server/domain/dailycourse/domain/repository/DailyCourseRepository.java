@@ -3,7 +3,6 @@ package com.drawandyou.drawandyou_server.domain.dailycourse.domain.repository;
 import com.drawandyou.drawandyou_server.domain.dailycourse.domain.entity.DailyCourse;
 import com.drawandyou.drawandyou_server.domain.dailycourse.presentation.dto.DailyCourseScoreResponse;
 import com.drawandyou.drawandyou_server.domain.therapyprogram.domain.entity.TherapyProgram;
-import com.drawandyou.drawandyou_server.domain.therapyprogram.presentation.dto.response.TherapyProgramScoreResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

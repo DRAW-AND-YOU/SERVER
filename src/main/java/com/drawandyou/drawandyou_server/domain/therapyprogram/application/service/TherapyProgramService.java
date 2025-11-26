@@ -4,15 +4,12 @@ import com.drawandyou.drawandyou_server.domain.dailycourse.domain.entity.DailyCo
 import com.drawandyou.drawandyou_server.domain.dailycourse.domain.entity.enums.CourseType;
 import com.drawandyou.drawandyou_server.domain.dailycourse.domain.repository.DailyCourseRepository;
 import com.drawandyou.drawandyou_server.domain.dailycourse.presentation.dto.DailyCourseScoreResponse;
-import com.drawandyou.drawandyou_server.domain.drawinganalysis.domain.entity.DrawingAnalysis;
-import com.drawandyou.drawandyou_server.domain.drawinganalysis.domain.repository.DrawingAnalysisRepository;
 import com.drawandyou.drawandyou_server.domain.therapyprogram.domain.entity.TherapyProgram;
 import com.drawandyou.drawandyou_server.domain.therapyprogram.domain.repository.TherapyProgramRepository;
 import com.drawandyou.drawandyou_server.domain.therapyprogram.exception.AlreadyParticipateInProgramException;
 import com.drawandyou.drawandyou_server.domain.therapyprogram.exception.NotAllCoursesCompletedException;
+import com.drawandyou.drawandyou_server.domain.therapyprogram.exception.TherapyProgramAccessDeniedException;
 import com.drawandyou.drawandyou_server.domain.therapyprogram.exception.TherapyProgramNotFoundException;
-import com.drawandyou.drawandyou_server.domain.therapyprogram.presentation.dto.response.OngoingProgramResponse;
-import com.drawandyou.drawandyou_server.domain.therapyprogram.presentation.dto.response.ParticipatedProgramIdResponse;
 import com.drawandyou.drawandyou_server.domain.therapyprogram.presentation.dto.response.TherapyProgramScoreResponse;
 import com.drawandyou.drawandyou_server.domain.user.application.service.UserFindService;
 import com.drawandyou.drawandyou_server.domain.user.domain.entity.User;
@@ -22,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
+
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +32,6 @@ public class TherapyProgramService {
 
     private final TherapyProgramRepository therapyProgramRepository;
     private final DailyCourseRepository dailyCourseRepository;
-    private final DrawingAnalysisRepository drawingAnalysisRepository;
 
     /**
      * 치유 프로그램 첫 등록하기
@@ -95,8 +91,18 @@ public class TherapyProgramService {
     }
 
     public TherapyProgramScoreResponse getTherapyProgramScores(Long userId, Long therapyProgramId) {
+        TherapyProgram therapyProgram = therapyProgramRepository.findById(therapyProgramId)
+                .orElseThrow(TherapyProgramAccessDeniedException::new);
+
+        validateUserOwnerShip(userId, therapyProgram);
         List<DailyCourseScoreResponse> scoreResponses = dailyCourseRepository.findScoresByTherapyProgramId(therapyProgramId);
         return new TherapyProgramScoreResponse(scoreResponses);
+    }
+
+    private static void validateUserOwnerShip(Long userId, TherapyProgram therapyProgram) {
+        if (!therapyProgram.getUser().getId().equals(userId)){
+            throw new TherapyProgramAccessDeniedException();
+        }
     }
 
     @Transactional
@@ -104,6 +110,8 @@ public class TherapyProgramService {
         TherapyProgram therapyProgram = therapyProgramRepository.findById(therapyProgramId)
                 .orElseThrow(TherapyProgramNotFoundException::new);
 
+        // 소유권 검증
+        validateUserOwnerShip(userId, therapyProgram);
         // 모든 데일리 코스가 완료되었는지 확인
         int completedCount = dailyCourseRepository.countByTherapyProgramAndIsCompleted(therapyProgram, true);
         if (completedCount < TOTAL_DAILY_COURSE_COUNT) {
