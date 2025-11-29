@@ -4,7 +4,6 @@ import com.drawandyou.drawandyou_server.domain.article.domain.entity.Article;
 import com.drawandyou.drawandyou_server.domain.article.domain.repository.ArticleCommentCountRepository;
 import com.drawandyou.drawandyou_server.domain.article.domain.repository.ArticleViewCountRepository;
 import com.drawandyou.drawandyou_server.domain.article.exception.ArticleCanNotDeleteException;
-import com.drawandyou.drawandyou_server.domain.article.exception.ArticleNotFoundException;
 import com.drawandyou.drawandyou_server.domain.article.exception.ArticleNotModifiableException;
 import com.drawandyou.drawandyou_server.domain.article.presentation.dto.request.ArticleCreateRequest;
 import com.drawandyou.drawandyou_server.domain.article.presentation.dto.request.ArticleUpdateRequest;
@@ -40,6 +39,7 @@ public class ArticleService {
     private final ArticleViewCountRepository articleViewCountRepository;
 
     private final UserFindService userFindService;
+    private final ArticleFindService articleFindService;
 
     @Transactional
     public ArticleCreateResponse createArticle(Long userId, ArticleCreateRequest request){
@@ -64,8 +64,7 @@ public class ArticleService {
     public void updateArticle(Long userId, Long articleId, ArticleUpdateRequest request) {
 
         User user = userFindService.findUser(userId);
-        Article article = articleRepository.findById(articleId)
-                .orElseThrow(ArticleNotFoundException::new);
+        Article article = articleFindService.findById(articleId);
 
         // user 가 article 의 소유자인지 검증한다.
         if (!article.getUser().equals(user)){
@@ -79,8 +78,7 @@ public class ArticleService {
     public void deleteArticle(Long userId, Long articleId) {
 
         User user = userFindService.findUser(userId);
-        Article article = articleRepository.findById(articleId)
-                .orElseThrow(ArticleNotFoundException::new);
+        Article article = articleFindService.findById(articleId);
 
         // 게시물을 삭제할 수 있는 권한이 있는지 검증 , 권한이 없다면 예외 발생
         if (!article.getUser().equals(user)){

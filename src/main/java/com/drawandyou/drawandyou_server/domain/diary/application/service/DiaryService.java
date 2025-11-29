@@ -3,7 +3,6 @@ package com.drawandyou.drawandyou_server.domain.diary.application.service;
 import com.drawandyou.drawandyou_server.domain.diary.domain.entity.Diary;
 import com.drawandyou.drawandyou_server.domain.diary.domain.repository.DiaryRepository;
 import com.drawandyou.drawandyou_server.domain.diary.exception.DiaryExistsException;
-import com.drawandyou.drawandyou_server.domain.diary.exception.DiaryNotFoundException;
 import com.drawandyou.drawandyou_server.domain.diary.exception.NotDiaryOwnerException;
 import com.drawandyou.drawandyou_server.domain.diary.presentation.dto.request.DiaryCreateRequest;
 import com.drawandyou.drawandyou_server.domain.diary.presentation.dto.response.DiaryCalendarResponse;
@@ -24,6 +23,7 @@ public class DiaryService {
 
     private final FastApiClient fastApiClient;
     private final DiarySaveService diarySaveService;
+    private final DiaryFindService diaryFindService;
 
     private final DiaryRepository diaryRepository;
 
@@ -57,8 +57,7 @@ public class DiaryService {
     }
 
     private Diary findDiaryAndVerifyOwner(Long userId, Long diaryId) {
-        Diary diary = diaryRepository.findById(diaryId)
-                .orElseThrow(DiaryNotFoundException::new);
+        Diary diary = diaryFindService.findById(diaryId);
 
         // user 의 diary 소유권 검증
         if (!diary.getAuthorId().equals(userId)){
