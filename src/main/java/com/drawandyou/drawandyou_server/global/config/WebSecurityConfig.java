@@ -61,6 +61,7 @@ public class WebSecurityConfig {
                         // Public endpoints (인증 불필요)
                         .requestMatchers(
                                 "/",
+                                "/api/s3/presigned-url",
                                 "/api/fastapi/**",
                                 "/api/auth/**",
                                 "/api/user/signup",
