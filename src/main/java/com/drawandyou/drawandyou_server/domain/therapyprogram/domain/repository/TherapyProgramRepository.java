@@ -28,5 +28,5 @@ public interface TherapyProgramRepository extends JpaRepository<TherapyProgram, 
     List<TherapyProgramInfoResponse> findTherapyProgramsByUserAndIsFinished(User user, boolean isFinished);
 
 
-
+    TherapyProgram findLatestByUserAndIsFinishedOrderByEndDateDesc(User user, boolean isFinished);
 }
