@@ -43,10 +43,5 @@ public class DailyCourseService {
 
         dailyCourse.assignDrawing(drawing);
         dailyCourse.changeStatusToCompleted();
-
-        // 만약에 dailyCourse 가 5일차이면, Therapy Program 도 완주시킨다.
-        if (dailyCourse.getCurrentDay() == 5){
-            therapyProgramService.completeProgram(userId);
-        }
     }
 }
