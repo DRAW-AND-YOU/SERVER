@@ -34,10 +34,9 @@ public class TherapyProgramFindService {
         boolean isProgramFinished = false;
         Optional<TherapyProgram> therapyProgramOpt = therapyProgramRepository.findByUserAndIsFinished(user, isProgramFinished);
 
-        // 데일리 코스 5일차까지 끝내고, 현황 조회하는 경우 Opt 는 empty 로 조회된다.
+        // isEmpty 인 경우는, 유저가 현재 진행하고 있는 치유 프로그램이 없다는 것.
         if (therapyProgramOpt.isEmpty()){
-            TherapyProgram finishedProgram = therapyProgramRepository.findLatestByUserAndIsFinishedOrderByEndDateDesc(user, true);
-            return new OngoingProgramResponse(finishedProgram.getId(), 5,DEFAULT_TOTAL_DAYS,null, true);
+            return new OngoingProgramResponse(null, 0,DEFAULT_TOTAL_DAYS,null, false);
         }
 
         TherapyProgram therapyProgram = therapyProgramOpt.get();
