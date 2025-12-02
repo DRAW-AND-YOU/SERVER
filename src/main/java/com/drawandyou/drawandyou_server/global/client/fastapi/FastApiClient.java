@@ -56,7 +56,7 @@ public class FastApiClient {
      */
     public Mono<DiaryImageResponse> generateDiaryImage(DiaryImageRequest request) {
         return webClient.post()
-                .uri("/diary/image")
+                .uri("/diary/ImageGenerate")
                 .bodyValue(request)
                 .retrieve()
                 .bodyToMono(DiaryImageResponse.class)

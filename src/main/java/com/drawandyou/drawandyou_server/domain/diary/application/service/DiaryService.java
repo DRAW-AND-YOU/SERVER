@@ -30,7 +30,7 @@ public class DiaryService {
     // 외부 api 호출은 트랜잭션 밖에서 수행
     public DiaryResponse writeDiary(Long userId, DiaryCreateRequest request) {
 
-        // 1. fast api client 에 keyword, title, content 넘겨준다.
+        // 1. fast api client 에 request body 로 content 를  넘겨준다.
         // 2. fast api 에서 이미지 생성 및 S3 에 업로드 . 생성한 imageUrl 을 반환
 
         // writtenAt을 기준으로, 동일한 날짜에 작성한 일기가 있다면 예외 던지기
@@ -42,7 +42,7 @@ public class DiaryService {
             throw new DiaryExistsException();
         }
 
-        DiaryImageRequest diaryImageRequest = new DiaryImageRequest(request.keyword().getMessage(), request.title(), request.content());
+        DiaryImageRequest diaryImageRequest = new DiaryImageRequest(request.content());
         DiaryImageResponse imageResponse = fastApiClient.generateDiaryImageSync(diaryImageRequest);
         // diary 저장은 트랜잭션 내부에서 수행
         Diary savedDiary = diarySaveService.save(userId, request, imageResponse);
@@ -76,8 +76,4 @@ public class DiaryService {
        return  diaryRepository.findDiariesForCalendar(userId, startDate, endDate);
     }
 
-    public DiaryResponse writeDiaryTest(Long userId, DiaryCreateRequest request) {
-        Diary savedDiary = diarySaveService.save(userId, request);
-        return DiaryResponse.from(savedDiary);
-    }
 }
