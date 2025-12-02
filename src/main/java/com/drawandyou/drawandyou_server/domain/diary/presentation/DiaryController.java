@@ -35,16 +35,6 @@ public class DiaryController {
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.DIARY_CREATE_SUCCESS.getMessage(), response);
     }
 
-    @Operation(summary = "테스트용 API - 일기 작성완료(AI 결과 받지 않음)")
-    @PostMapping("/test")
-    public ApiResponse<DiaryResponse> createDiaryTest(
-            @AuthenticationPrincipal Long userId,
-            @RequestBody @Valid DiaryCreateRequest request){
-
-        DiaryResponse response = diaryService.writeDiaryTest(userId, request);
-        return ApiResponse.success(HttpStatus.OK, ResponseMessage.DIARY_CREATE_SUCCESS.getMessage(), response);
-    }
-
     @Operation(summary = "일기 삭제")
     @DeleteMapping("/{diaryId}")
     public ApiResponse<Void> deleteDiary(
