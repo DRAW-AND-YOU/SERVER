@@ -24,9 +24,7 @@ public interface TherapyProgramRepository extends JpaRepository<TherapyProgram, 
     @Query("SELECT new com.drawandyou.drawandyou_server.domain.therapyprogram.presentation.dto.response.TherapyProgramInfoResponse(" +
             "tp.startDate, tp.endDate, tp.id) " +
             "FROM TherapyProgram tp " +
-            "WHERE tp.isFinished = :isFinished")
+            "WHERE tp.isFinished = :isFinished AND tp.user = :user")
     List<TherapyProgramInfoResponse> findTherapyProgramsByUserAndIsFinished(User user, boolean isFinished);
 
-
-    TherapyProgram findLatestByUserAndIsFinishedOrderByEndDateDesc(User user, boolean isFinished);
 }
