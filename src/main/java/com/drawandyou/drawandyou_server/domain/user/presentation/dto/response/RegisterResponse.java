@@ -5,6 +5,7 @@ import lombok.Builder;
 @Builder
 public record RegisterResponse(
         Long userId,
-        String username
+        String username,
+        String accessToken
 ) {
 }

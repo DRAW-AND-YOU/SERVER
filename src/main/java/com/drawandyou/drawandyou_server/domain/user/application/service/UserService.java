@@ -32,7 +32,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Transactional
-    public RegisterResponse registerUser(RegisterRequest registerRequestDto, HttpServletResponse response) {
+    public RegisterResponse registerUser(RegisterRequest registerRequestDto) {
 
         if (registerRequestDto == null || registerRequestDto.password() == null) {
             throw new InvalidPasswordException();
@@ -50,22 +50,12 @@ public class UserService {
 
         User registeredUser = create(user);
 
-        String createdAccessToken = tokenProvider.create(registeredUser);
-
-        ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", createdAccessToken)
-                .httpOnly(true)
-                .secure(true)
-                .domain(".drawandyou.com")
-                .path("/")
-                .maxAge(Duration.ofHours(1))
-                .sameSite("None")
-                .build();
-
-        response.addHeader("Set-Cookie", accessTokenCookie.toString());
+        String accessToken = tokenProvider.create(registeredUser);
 
         return RegisterResponse.builder()
                 .userId(registeredUser.getId())
                 .username(registeredUser.getUsername())
+                .accessToken(accessToken)
                 .build();
     }
 
@@ -166,12 +156,11 @@ public class UserService {
 
 
     @Transactional
-    public void processExtraSignUpForSocialLoginUser(Long userId, ExtraRegisterRequest extraRegisterRequest,
-                                                     HttpServletResponse response) {
+    public RegisterResponse processExtraSignUpForSocialLoginUser(Long userId, ExtraRegisterRequest extraRegisterRequest) {
         User user = userFindService.findUser(userId);
 
         // 소셜 로그인 유저가 아니라면 예외를 던진다.
-        if (user.getAuthProvider() == null || user.getAuthProvider().isEmpty()){
+        if (user.getAuthProvider() == null || user.getAuthProvider().isEmpty()) {
             throw new NotSocialLoginUserException();
         }
         // nickname, birthdate, gender, hobbies
@@ -180,20 +169,13 @@ public class UserService {
         user.assignGender(extraRegisterRequest.gender());
         user.assignHobbies(extraRegisterRequest.hobbies());
 
-        String createdAccessToken = tokenProvider.create(user);
+        String accessToken = tokenProvider.create(user);
 
-        ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", createdAccessToken)
-                .httpOnly(true)
-                .secure(true)
-                .domain(".drawandyou.com")
-                .path("/")
-                .maxAge(Duration.ofHours(1))
-                .sameSite("None")
+        return RegisterResponse.builder()
+                .userId(user.getId())
+                .username(user.getUsername())
+                .accessToken(accessToken)
                 .build();
-
-        response.addHeader("Set-Cookie", accessTokenCookie.toString());
-
-
     }
 
     @Transactional

@@ -31,10 +31,9 @@ public class UserController {
      */
     @Operation(summary = "일반 회원가입")
     @PostMapping("/signup")
-    public ApiResponse<RegisterResponse> registerUser(@RequestBody @Valid RegisterRequest registerRequest,
-                                                      HttpServletResponse servletResponse) {
+    public ApiResponse<RegisterResponse> registerUser(@RequestBody @Valid RegisterRequest registerRequest) {
 
-        RegisterResponse response = userService.registerUser(registerRequest, servletResponse);
+        RegisterResponse response = userService.registerUser(registerRequest);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.USER_SIGNUP_SUCCESS.getMessage(), response);
     }
 
@@ -121,12 +120,11 @@ public class UserController {
 
     @Operation(summary = "소셜 로그인 유저 추가 회원가입")
     @PostMapping("/signup/extra")
-    public ApiResponse<Void> processExtraSignUpForSocialLoginUser(
+    public ApiResponse<RegisterResponse> processExtraSignUpForSocialLoginUser(
             @AuthenticationPrincipal Long userId,
-            @RequestBody @Valid ExtraRegisterRequest extraRegisterRequest,
-            HttpServletResponse response){
-        userService.processExtraSignUpForSocialLoginUser(userId, extraRegisterRequest, response);
-        return ApiResponse.success(HttpStatus.OK, ResponseMessage.SOCIAL_LOGIN_USER_EXTRA_SIGN_UP_SUCCESS.getMessage());
+            @RequestBody @Valid ExtraRegisterRequest extraRegisterRequest){
+        RegisterResponse response = userService.processExtraSignUpForSocialLoginUser(userId, extraRegisterRequest);
+        return ApiResponse.success(HttpStatus.OK, ResponseMessage.SOCIAL_LOGIN_USER_EXTRA_SIGN_UP_SUCCESS.getMessage(), response);
     }
 
     @Operation(summary = "마이페이지 - 프로필 이미지 변경")
