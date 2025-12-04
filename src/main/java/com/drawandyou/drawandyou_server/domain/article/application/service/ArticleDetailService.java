@@ -1,5 +1,6 @@
 package com.drawandyou.drawandyou_server.domain.article.application.service;
 
+import com.drawandyou.drawandyou_server.domain.article.application.service.dto.ViewResult;
 import com.drawandyou.drawandyou_server.domain.article.domain.entity.Article;
 import com.drawandyou.drawandyou_server.domain.article.domain.event.ArticleViewEvent;
 import com.drawandyou.drawandyou_server.domain.article.domain.repository.ArticleRepository;
@@ -39,10 +40,12 @@ public class ArticleDetailService {
         Article article = articleRepository.findById(articleId)
                 .orElseThrow(ArticleNotFoundException::new);
 
-        Long viewCount = articleViewService.increase(articleId, userId);
+        ViewResult viewCount = articleViewService.increase(articleId, userId);
 
-        // 조회 이벤트 발행
-        publishViewEvent(articleId, userId);
+        // 조회수가 실제로 증가한 경우에만, 이벤트를 발행해야한다.
+        if (viewCount.incremented()){
+            publishViewEvent(articleId, userId);
+        }
 
         Long likeCount = articleLikeCountRepository.findById(articleId)
                 .map(ArticleLikeCount::getLikeCount)
@@ -53,7 +56,7 @@ public class ArticleDetailService {
         return ArticleDetailResponse.toResponse(
                 article,
                 articleImage,
-                viewCount,
+                viewCount.count(),
                 likeCount
         );
     }
