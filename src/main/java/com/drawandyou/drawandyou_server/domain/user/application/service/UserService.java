@@ -7,13 +7,17 @@ import com.drawandyou.drawandyou_server.global.auth.presentation.dto.UserAuthDto
 import com.drawandyou.drawandyou_server.global.security.TokenProvider;
 import com.drawandyou.drawandyou_server.domain.user.domain.entity.User;
 import com.drawandyou.drawandyou_server.domain.user.domain.repository.UserRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Duration;
 
 @Slf4j
 @Service
@@ -28,7 +32,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Transactional
-    public RegisterResponse registerUser(RegisterRequest registerRequestDto) {
+    public RegisterResponse registerUser(RegisterRequest registerRequestDto, HttpServletResponse response) {
 
         if (registerRequestDto == null || registerRequestDto.password() == null) {
             throw new InvalidPasswordException();
@@ -45,6 +49,19 @@ public class UserService {
                 .build();
 
         User registeredUser = create(user);
+
+        String createdAccessToken = tokenProvider.create(registeredUser);
+
+        ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", createdAccessToken)
+                .httpOnly(true)
+                .secure(true)
+                .domain(".drawandyou.com")
+                .path("/")
+                .maxAge(Duration.ofHours(1))
+                .sameSite("None")
+                .build();
+
+        response.addHeader("Set-Cookie", accessTokenCookie.toString());
 
         return RegisterResponse.builder()
                 .userId(registeredUser.getId())
@@ -149,7 +166,8 @@ public class UserService {
 
 
     @Transactional
-    public void processExtraSignUpForSocialLoginUser(Long userId, ExtraRegisterRequest extraRegisterRequest) {
+    public void processExtraSignUpForSocialLoginUser(Long userId, ExtraRegisterRequest extraRegisterRequest,
+                                                     HttpServletResponse response) {
         User user = userFindService.findUser(userId);
 
         // 소셜 로그인 유저가 아니라면 예외를 던진다.
@@ -161,6 +179,21 @@ public class UserService {
         user.assignBirthDate(extraRegisterRequest.birthDate());
         user.assignGender(extraRegisterRequest.gender());
         user.assignHobbies(extraRegisterRequest.hobbies());
+
+        String createdAccessToken = tokenProvider.create(user);
+
+        ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", createdAccessToken)
+                .httpOnly(true)
+                .secure(true)
+                .domain(".drawandyou.com")
+                .path("/")
+                .maxAge(Duration.ofHours(1))
+                .sameSite("None")
+                .build();
+
+        response.addHeader("Set-Cookie", accessTokenCookie.toString());
+
+
     }
 
     @Transactional
