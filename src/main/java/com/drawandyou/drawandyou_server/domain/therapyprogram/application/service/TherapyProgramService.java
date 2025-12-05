@@ -120,4 +120,9 @@ public class TherapyProgramService {
 
         therapyProgram.changeStatusToFinish();
     }
+
+    // 완주한 프로그램 수 계산
+    public Long getCompletedProgramCount(Long userId){
+        return therapyProgramRepository.countCompletedProgramByUserId(userId);
+    }
 }

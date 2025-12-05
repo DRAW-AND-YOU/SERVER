@@ -121,4 +121,9 @@ public class ArticleService {
         return ArticleScrollResponse.of(articlesWithViewCount, pageSize);
     }
 
+    // 유저가 작성한 게시글 수 반환
+    public Long getArticleCount(Long userId) {
+        return articleRepository.countByUserId(userId);
+    }
+
 }

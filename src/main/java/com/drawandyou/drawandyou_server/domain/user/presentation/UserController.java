@@ -158,6 +158,11 @@ public class UserController {
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.USER_HOBBIES_CHANGE_SUCCESS.getMessage(), response);
     }
 
-
-
+    @Operation(summary = "대시보드 - 참여정보(총 작품 수, 게시글 수, 코스 완주 횟수) 조회")
+    @GetMapping("/dashboard/stats")
+    public ApiResponse<DashBoardStatsResponse> getDashboardStats(
+            @AuthenticationPrincipal Long userId){
+        DashBoardStatsResponse response = userService.getDashboardStats(userId);
+        return ApiResponse.success(HttpStatus.OK, ResponseMessage.USER_DASHBOARD_STATS_GET_SUCCESS.getMessage(), response);
+    }
 }

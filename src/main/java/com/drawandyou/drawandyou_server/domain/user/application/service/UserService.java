@@ -1,5 +1,9 @@
 package com.drawandyou.drawandyou_server.domain.user.application.service;
 
+import com.drawandyou.drawandyou_server.domain.article.application.service.ArticleService;
+import com.drawandyou.drawandyou_server.domain.drawinganalysis.application.service.DrawingAnalyzeService;
+import com.drawandyou.drawandyou_server.domain.drawinganalysis.domain.repository.DrawingAnalysisRepository;
+import com.drawandyou.drawandyou_server.domain.therapyprogram.application.service.TherapyProgramService;
 import com.drawandyou.drawandyou_server.domain.user.exception.*;
 import com.drawandyou.drawandyou_server.domain.user.presentation.dto.request.*;
 import com.drawandyou.drawandyou_server.domain.user.presentation.dto.response.*;
@@ -7,17 +11,13 @@ import com.drawandyou.drawandyou_server.global.auth.presentation.dto.UserAuthDto
 import com.drawandyou.drawandyou_server.global.security.TokenProvider;
 import com.drawandyou.drawandyou_server.domain.user.domain.entity.User;
 import com.drawandyou.drawandyou_server.domain.user.domain.repository.UserRepository;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Duration;
 
 @Slf4j
 @Service
@@ -26,10 +26,14 @@ import java.time.Duration;
 public class UserService {
 
     private final UserFindService userFindService;
+    private final TherapyProgramService therapyProgramService;
+    private final ArticleService articleService;
+    private final DrawingAnalyzeService drawingAnalyzeService;
 
     private final UserRepository userRepository;
     private final TokenProvider tokenProvider;
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final DrawingAnalysisRepository drawingAnalysisRepository;
 
     @Transactional
     public RegisterResponse registerUser(RegisterRequest registerRequestDto) {
@@ -208,5 +212,13 @@ public class UserService {
         user.assignHobbies(hobbiesChangeRequest.hobbies());
         Hibernate.initialize(user.getHobbies());
         return UserMyPageResponse.toMyPageResponse(user);
+    }
+
+    public DashBoardStatsResponse getDashboardStats(Long userId) {
+        Long drawingCount = drawingAnalyzeService.getDrawingAnalysisCount(userId);
+        Long articleCount = articleService.getArticleCount(userId);
+        Long completedProgramCount = therapyProgramService.getCompletedProgramCount(userId);
+
+        return DashBoardStatsResponse.of(drawingCount, articleCount, completedProgramCount);
     }
 }
