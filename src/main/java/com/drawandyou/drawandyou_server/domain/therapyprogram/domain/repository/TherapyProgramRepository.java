@@ -27,4 +27,7 @@ public interface TherapyProgramRepository extends JpaRepository<TherapyProgram, 
             "WHERE tp.isFinished = :isFinished AND tp.user = :user")
     List<TherapyProgramInfoResponse> findTherapyProgramsByUserAndIsFinished(User user, boolean isFinished);
 
+    @Query("SELECT count(tp.id) FROM TherapyProgram tp WHERE tp.user.id = :userId " +
+            "AND tp.isFinished = true")
+    Long countCompletedProgramByUserId(Long userId);
 }

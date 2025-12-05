@@ -2,6 +2,7 @@ package com.drawandyou.drawandyou_server.domain.drawinganalysis.application.serv
 
 import com.drawandyou.drawandyou_server.domain.drawing.domain.entity.Drawing;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.domain.entity.DrawingAnalysis;
+import com.drawandyou.drawandyou_server.domain.drawinganalysis.domain.repository.DrawingAnalysisRepository;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.request.ContentRecommendRequest;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.request.DrawingAnalysisRequest;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.presentation.dto.response.FastApiRecommendResponse;
@@ -19,6 +20,8 @@ public class DrawingAnalyzeService {
     private final UserFindService userFindService;
     private final FastApiClient fastApiClient;
     private final DrawingWithAnalysisTransactionService transactionService;
+
+    private final DrawingAnalysisRepository drawingAnalysisRepository;
 
     /**
      * 그림 분석 및 컨텐츠 추천을 수행합니다.
@@ -54,5 +57,10 @@ public class DrawingAnalyzeService {
                 imageUrl,
                 fastApiResponse
         );
+    }
+
+    // 유저가 참여한 drawing analysis 의 수를 반환
+    public Long getDrawingAnalysisCount(Long userId){
+        return drawingAnalysisRepository.countByUserId(userId);
     }
 }
