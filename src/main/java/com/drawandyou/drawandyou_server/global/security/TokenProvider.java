@@ -6,6 +6,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -22,10 +24,16 @@ import java.util.Date;
 public class TokenProvider {
 
     //ㅓjwt 서명에 사용할 비밀키 512 바이트 이상 추천 (토큰의 무결성을 보장하기 위한 비밀 문자열)
-    private static final String SECRET_KEY = "MyVeryLongSecretKeyThatIsAtLeast512BitsLongForSecurityPurposes123456";
-
+    @Value("${jwt.secret-key}")
+    private String secretKey;
     // 비밀키로부터 HMAC SHA 키 객체 생성 (secret key 를 바탕으로 만들어진 서명용 key 객체)
-    private static final Key SIGNING_KEY = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+    private Key signingKey;
+
+    @PostConstruct
+    public void init() {
+        this.signingKey = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+    }
+
 
     // 사용자 정보 기반으로 jwt 토큰 생성
     public String create(User userEntity) {
@@ -34,9 +42,9 @@ public class TokenProvider {
 
         // jwt 생성 및 반환
         return Jwts.builder()
-                .signWith(SIGNING_KEY, SignatureAlgorithm.HS512) // 서명 알고리즘 및 키 설정
+                .signWith(signingKey, SignatureAlgorithm.HS512) // 서명 알고리즘 및 키 설정
                 .setSubject(String.valueOf(userEntity.getId())) // 사용자 id 를 subject 로 설정
-                .setIssuer("demo app") // 토큰 발급자 정보 설정
+                .setIssuer("draw and you") // 토큰 발급자 정보 설정
                 .setIssuedAt(new Date()) // 토큰 발급 시간 설정
                 .setExpiration(expiryDate) // 만료 시간 설정
                 .compact(); // 토큰 생성 완료
@@ -46,7 +54,7 @@ public class TokenProvider {
     public String validateAndGetUserId(String token) {
         // 토큰 파싱 및 검증 (서명 유효 확인)
         Claims claims = Jwts.parserBuilder()
-                .setSigningKey(SIGNING_KEY)
+                .setSigningKey(signingKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();// payload(claims) 추출
@@ -63,7 +71,7 @@ public class TokenProvider {
 
         // 토큰 생성
         return Jwts.builder()
-                .signWith(SIGNING_KEY, SignatureAlgorithm.HS512) // 서명 알고리즘 및 키 설정
+                .signWith(signingKey, SignatureAlgorithm.HS512) // 서명 알고리즘 및 키 설정
                 .setSubject(String.valueOf(userId)) // 사용자 id 를 subject 로 설정
                 .setIssuedAt(new Date()) // 토큰 발급 시간 설정
                 .setExpiration(expiryDate) // 만료 시간 설정
@@ -79,7 +87,7 @@ public class TokenProvider {
                 .setSubject(userPrincipal.getName())
                 .setIssuedAt(new Date())
                 .setExpiration(expiryDate)
-                .signWith(SIGNING_KEY, SignatureAlgorithm.HS512)
+                .signWith(signingKey, SignatureAlgorithm.HS512)
                 .compact();
     }
 }
