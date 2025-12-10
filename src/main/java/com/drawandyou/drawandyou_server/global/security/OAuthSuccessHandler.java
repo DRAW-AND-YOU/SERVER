@@ -26,6 +26,8 @@ import static com.drawandyou.drawandyou_server.global.security.RedirectUrlCookie
 public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     // oauth2 로그인 성공시 처리 로직을 담당하는 클래스
 
+    private final TokenProvider tokenProvider;
+
     // 이 url 은, 소셜 로그인 성공후 사용자를 리다이렉트 시킬때 , 쿠키나 리디렉션 정보가 없을 경우 사용하는 기본 url
     // 최후에 보낼 url 임 .
     private static final String LOCAL_REDIRECT_URL = "http://localhost:3000"; // 기본 리다이렉트 주소
@@ -35,7 +37,6 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
 
-        TokenProvider tokenProvider = new TokenProvider(); // jwt 토큰 발급을 위한 객체 생성
         String token = tokenProvider.create(authentication); // 인증 정보 기반으로 jwt 토큰 생성
 
         // ResponseCookie로 JWT 토큰 전달 (서브도메인 간 쿠키 공유)
