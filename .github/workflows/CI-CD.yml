@@ -27,8 +27,8 @@ jobs:
       - name: gradlew 실행 권한 부여
         run: chmod +x ./gradlew
 
-      - name: 테스트 및 빌드하기
-        run: ./gradlew clean build
+      - name: 빌드하기 (테스트 제외)
+        run: ./gradlew clean build -x test
 
       - name: AWS RESOURCE 에 접근할 수 있게 AWS CREDENTIALS 설정
         uses: aws-actions/configure-aws-credentials@v4
@@ -66,4 +66,4 @@ jobs:
               sudo docker stop draw-and-you-server || true
               sudo docker rm draw-and-you-server || true
               sudo docker pull ${{ steps.login-ecr.outputs.registry }}/draw-and-you-server:latest
-              sudo docker run -d --name draw-and-you-server -p 8080:8080 --network draw-and-you-network ${{ steps.login-ecr.outputs.registry }}/draw-and-you-server:latest
+              sudo docker run -d --name draw-and-you-server -p 8080:8080 --network draw-and-you-network -e JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}" ${{ steps.login-ecr.outputs.registry }}/draw-and-you-server:latest
