@@ -1,4 +1,12 @@
-## DRAW-AND-YOU 백엔드 레포지토리
+
+<img width="854" height="288" alt="image" src="https://github.com/user-attachments/assets/a72a5eac-ba87-4629-8ada-003d52695743" />
+
+# DRAW&YOU
+
+그림·일기 기반의 감정 분석 및 치유 경험을 제공하는 **AI 웹 서비스**입니다.  
+AI 는 사용자가 직접 그린 그림 또는 업로드한 이미지를 분석하고, 
+개인 맞춤형 치유 코스와 힐링 콘텐츠를 추천합니다. 
+
 
 개발기간 2025.09.01 ~ 현재 
 
