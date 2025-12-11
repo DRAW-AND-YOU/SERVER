@@ -10,7 +10,6 @@ import com.drawandyou.drawandyou_server.domain.article.presentation.message.Resp
 import com.drawandyou.drawandyou_server.global.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

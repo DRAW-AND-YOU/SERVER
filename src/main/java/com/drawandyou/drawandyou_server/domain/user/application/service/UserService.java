@@ -2,7 +2,6 @@ package com.drawandyou.drawandyou_server.domain.user.application.service;
 
 import com.drawandyou.drawandyou_server.domain.article.application.service.ArticleService;
 import com.drawandyou.drawandyou_server.domain.drawinganalysis.application.service.DrawingAnalyzeService;
-import com.drawandyou.drawandyou_server.domain.drawinganalysis.domain.repository.DrawingAnalysisRepository;
 import com.drawandyou.drawandyou_server.domain.therapyprogram.application.service.TherapyProgramService;
 import com.drawandyou.drawandyou_server.domain.user.exception.*;
 import com.drawandyou.drawandyou_server.domain.user.presentation.dto.request.*;
@@ -33,7 +32,6 @@ public class UserService {
     private final UserRepository userRepository;
     private final TokenProvider tokenProvider;
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-    private final DrawingAnalysisRepository drawingAnalysisRepository;
 
     @Transactional
     public RegisterResponse registerUser(RegisterRequest registerRequestDto) {
