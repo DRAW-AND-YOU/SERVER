@@ -17,8 +17,12 @@ MAX_TURNS = 30
 
 def _make_github_params() -> StdioServerParameters:
     return StdioServerParameters(
-        command="npx",
-        args=["-y", "@modelcontextprotocol/server-github"],
+        command="docker",
+        args=[
+            "run", "-i", "--rm",
+            "-e", "GITHUB_PERSONAL_ACCESS_TOKEN",
+            "ghcr.io/github/github-mcp-server",
+        ],
         env={"GITHUB_PERSONAL_ACCESS_TOKEN": GITHUB_TOKEN},
     )
 
@@ -26,7 +30,7 @@ def _make_github_params() -> StdioServerParameters:
 def _make_notion_params() -> StdioServerParameters:
     return StdioServerParameters(
         command="npx",
-        args=["-y", "@anthropic-ai/notion-mcp-server"],
+        args=["-y", "@notionhq/notion-mcp-server"],
         env={"NOTION_API_TOKEN": NOTION_API_TOKEN},
     )
 
