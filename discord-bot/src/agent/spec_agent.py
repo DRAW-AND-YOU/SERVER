@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+from copy import deepcopy
 from contextlib import AsyncExitStack
 from urllib import error, request
 
@@ -15,6 +16,116 @@ logger = logging.getLogger(__name__)
 MODEL = "gemini-2.5-pro"
 MAX_TURNS = 30
 GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+
+
+def _resolve_local_ref(root: dict, ref: str) -> dict | None:
+    if not ref.startswith("#/"):
+        return None
+
+    current: object = root
+    for part in ref[2:].split("/"):
+        if not isinstance(current, dict):
+            return None
+        current = current.get(part)
+        if current is None:
+            return None
+    if isinstance(current, dict):
+        return deepcopy(current)
+    return None
+
+
+def _resolve_schema_refs(schema: dict) -> dict:
+    root = deepcopy(schema)
+
+    def _walk(node: object, seen: set[str]) -> object:
+        if isinstance(node, list):
+            return [_walk(item, seen) for item in node]
+        if not isinstance(node, dict):
+            return node
+
+        if "$ref" in node and isinstance(node["$ref"], str):
+            ref = node["$ref"]
+            if ref in seen:
+                return {}
+
+            resolved = _resolve_local_ref(root, ref)
+            if resolved is None:
+                return {}
+
+            merged = {k: v for k, v in node.items() if k != "$ref"}
+            merged = {**resolved, **merged}
+            return _walk(merged, seen | {ref})
+
+        return {k: _walk(v, seen) for k, v in node.items()}
+
+    resolved = _walk(root, set())
+    if isinstance(resolved, dict):
+        return resolved
+    return {"type": "object", "properties": {}}
+
+
+def _sanitize_for_gemini_schema(node: object) -> object:
+    """Gemini function parameters가 허용하는 JSON Schema subset으로 축소."""
+    if isinstance(node, list):
+        return [_sanitize_for_gemini_schema(item) for item in node]
+    if not isinstance(node, dict):
+        return node
+
+    allowed_keys = {
+        "type", "format", "description", "nullable", "enum",
+        "items", "properties", "required", "anyOf",
+    }
+
+    cleaned: dict = {}
+    for key, value in node.items():
+        if key not in allowed_keys:
+            continue
+
+        if key == "properties" and isinstance(value, dict):
+            cleaned_props = {
+                prop_name: _sanitize_for_gemini_schema(prop_schema)
+                for prop_name, prop_schema in value.items()
+            }
+            cleaned["properties"] = cleaned_props
+            continue
+
+        if key == "required" and isinstance(value, list):
+            cleaned["required"] = [v for v in value if isinstance(v, str)]
+            continue
+
+        cleaned[key] = _sanitize_for_gemini_schema(value)
+
+    if "type" not in cleaned:
+        if "properties" in cleaned:
+            cleaned["type"] = "object"
+        elif "items" in cleaned:
+            cleaned["type"] = "array"
+
+    if cleaned.get("type") == "array" and "items" not in cleaned:
+        cleaned["items"] = {"type": "string"}
+
+    if cleaned.get("type") == "object" and "properties" not in cleaned:
+        cleaned["properties"] = {}
+
+    if "required" in cleaned and "properties" in cleaned:
+        property_keys = set(cleaned["properties"].keys())
+        cleaned["required"] = [k for k in cleaned["required"] if k in property_keys]
+
+    return cleaned
+
+
+def _normalize_tool_schema(schema: dict | None) -> dict:
+    base = schema or {"type": "object", "properties": {}}
+    resolved = _resolve_schema_refs(base)
+    sanitized = _sanitize_for_gemini_schema(resolved)
+
+    if not isinstance(sanitized, dict):
+        return {"type": "object", "properties": {}}
+    if "type" not in sanitized:
+        sanitized["type"] = "object"
+    if sanitized["type"] == "object" and "properties" not in sanitized:
+        sanitized["properties"] = {}
+    return sanitized
 
 
 def _make_github_params() -> StdioServerParameters:
@@ -48,7 +159,7 @@ async def _collect_tools(
     tools = []
     for tool in result.tools:
         function_name = f"{server_name}__{tool.name}"
-        schema = tool.inputSchema or {"type": "object", "properties": {}}
+        schema = _normalize_tool_schema(tool.inputSchema)
 
         tools.append(
             {

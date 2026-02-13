@@ -25,6 +25,7 @@ REVERSE_PATTERN = re.compile(
 ENDPOINT_PATTERN = re.compile(r"(/api/\S+)")
 
 MAX_DISCORD_LENGTH = 2000
+MAX_ERROR_PREVIEW = 1200
 
 
 def _is_allowed_channel(channel_id: int) -> bool:
@@ -60,6 +61,13 @@ def _split_message(text: str) -> list[str]:
         chunks.append(text[:split_at])
         text = text[split_at:].lstrip("\n")
     return chunks
+
+
+def _build_error_text(error: Exception) -> str:
+    text = str(error).strip() or error.__class__.__name__
+    if len(text) > MAX_ERROR_PREVIEW:
+        text = text[:MAX_ERROR_PREVIEW] + "... (truncated)"
+    return f"명세서 업데이트 중 오류가 발생했습니다:\n{text}"
 
 
 def create_bot() -> discord.Client:
@@ -99,7 +107,8 @@ def create_bot() -> discord.Client:
                 await interaction.followup.send(chunk)
         except Exception as e:
             logger.exception("Agent failed for target=%s", target)
-            await interaction.followup.send(f"명세서 업데이트 중 오류가 발생했습니다: {e}")
+            for chunk in _split_message(_build_error_text(e)):
+                await interaction.followup.send(chunk)
 
     # --- 자연어 메시지 핸들러 ---
     @bot.event
@@ -124,7 +133,8 @@ def create_bot() -> discord.Client:
                     await message.reply(chunk)
             except Exception as e:
                 logger.exception("Agent failed for target=%s", target)
-                await message.reply(f"명세서 업데이트 중 오류가 발생했습니다: {e}")
+                for chunk in _split_message(_build_error_text(e)):
+                    await message.reply(chunk)
 
     # --- Bot ready ---
     @bot.event
