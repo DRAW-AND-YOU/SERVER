@@ -23,7 +23,10 @@ def _make_github_params() -> StdioServerParameters:
             "-e", "GITHUB_PERSONAL_ACCESS_TOKEN",
             "ghcr.io/github/github-mcp-server",
         ],
-        env={"GITHUB_PERSONAL_ACCESS_TOKEN": GITHUB_TOKEN},
+        env={
+            "GITHUB_PERSONAL_ACCESS_TOKEN": GITHUB_TOKEN,
+            "DOCKER_API_VERSION": "1.43",
+        },
     )
 
 
