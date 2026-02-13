@@ -50,6 +50,14 @@ DOMAIN_REGISTRY: dict[str, dict[str, str]] = {
 
 VALID_DOMAINS = list(DOMAIN_REGISTRY.keys())
 
+
+def _format_domain_paths() -> str:
+    lines = []
+    for domain, paths in DOMAIN_REGISTRY.items():
+        lines.append(f"- **{domain}**: Controller=`{paths['controller']}`, DTO=`{paths['dto']}`")
+    return "\n".join(lines)
+
+
 SYSTEM_PROMPT = f"""\
 당신은 DRAW&YOU 프로젝트의 API 명세서 자동 업데이트 에이전트입니다.
 
@@ -94,13 +102,6 @@ SYSTEM_PROMPT = f"""\
 - `@Valid`가 붙은 요청 DTO의 유효성 검증 조건도 명세에 포함합니다.
 - Notion 페이지가 없으면 새로 생성하지 말고, 사용자에게 알려주세요.
 """
-
-
-def _format_domain_paths() -> str:
-    lines = []
-    for domain, paths in DOMAIN_REGISTRY.items():
-        lines.append(f"- **{domain}**: Controller=`{paths['controller']}`, DTO=`{paths['dto']}`")
-    return "\n".join(lines)
 
 
 def build_user_message(domain: str, endpoint: str | None = None) -> str:
