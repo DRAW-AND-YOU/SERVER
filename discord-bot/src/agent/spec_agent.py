@@ -82,10 +82,12 @@ def _sanitize_for_gemini_schema(node: object) -> object:
             continue
 
         if key == "properties" and isinstance(value, dict):
-            cleaned_props = {
-                prop_name: _sanitize_for_gemini_schema(prop_schema)
-                for prop_name, prop_schema in value.items()
-            }
+            cleaned_props = {}
+            for prop_name, prop_schema in value.items():
+                normalized_prop = _sanitize_for_gemini_schema(prop_schema)
+                if not isinstance(normalized_prop, dict):
+                    normalized_prop = {"type": "string"}
+                cleaned_props[prop_name] = normalized_prop
             cleaned["properties"] = cleaned_props
             continue
 
@@ -95,6 +97,43 @@ def _sanitize_for_gemini_schema(node: object) -> object:
 
         cleaned[key] = _sanitize_for_gemini_schema(value)
 
+    if "type" in cleaned:
+        type_val = cleaned["type"]
+        if isinstance(type_val, list):
+            nullable = cleaned.get("nullable", False)
+            normalized_types = [t for t in type_val if isinstance(t, str)]
+            if "null" in normalized_types:
+                nullable = True
+                normalized_types = [t for t in normalized_types if t != "null"]
+            cleaned["type"] = normalized_types[0] if normalized_types else "string"
+            if nullable:
+                cleaned["nullable"] = True
+        elif not isinstance(type_val, str):
+            del cleaned["type"]
+
+    if "anyOf" in cleaned:
+        any_of_val = cleaned.pop("anyOf")
+        nullable = cleaned.get("nullable", False)
+        selected: dict | None = None
+
+        if isinstance(any_of_val, list):
+            for candidate in any_of_val:
+                if not isinstance(candidate, dict):
+                    continue
+                candidate_type = candidate.get("type")
+                if candidate_type == "null":
+                    nullable = True
+                    continue
+                selected = candidate
+                break
+
+        if selected:
+            for key, value in selected.items():
+                if key not in cleaned:
+                    cleaned[key] = value
+        if nullable:
+            cleaned["nullable"] = True
+
     if "type" not in cleaned:
         if "properties" in cleaned:
             cleaned["type"] = "object"
@@ -102,6 +141,8 @@ def _sanitize_for_gemini_schema(node: object) -> object:
             cleaned["type"] = "array"
 
     if cleaned.get("type") == "array" and "items" not in cleaned:
+        cleaned["items"] = {"type": "string"}
+    if "items" in cleaned and not isinstance(cleaned["items"], dict):
         cleaned["items"] = {"type": "string"}
 
     if cleaned.get("type") == "object" and "properties" not in cleaned:
