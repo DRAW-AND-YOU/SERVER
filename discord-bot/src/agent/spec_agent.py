@@ -8,12 +8,12 @@ from urllib import error, request
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
-from src.config import GEMINI_API_KEY, GITHUB_TOKEN, NOTION_API_TOKEN
+from src.config import GEMINI_API_KEY, GEMINI_MODEL, GITHUB_TOKEN, NOTION_API_TOKEN
 from src.agent.prompts import SYSTEM_PROMPT, build_user_message
 
 logger = logging.getLogger(__name__)
 
-MODEL = "gemini-2.5-pro"
+MODEL = GEMINI_MODEL or "gemini-2.5-flash"
 MAX_TURNS = 30
 GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
 

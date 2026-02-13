@@ -13,6 +13,7 @@ DISCORD_ALLOWED_CHANNEL_IDS: list[int] = [
 ]
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "").strip()
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "").strip()
 NOTION_API_TOKEN = os.getenv("NOTION_API_TOKEN", "").strip()
 
