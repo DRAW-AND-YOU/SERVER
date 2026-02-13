@@ -72,10 +72,14 @@ async def _call_tool(
     return "\n".join(text_parts)
 
 
-async def run_spec_agent(domain: str) -> str:
+async def run_spec_agent(domain: str, endpoint: str | None = None) -> str:
     """
     지정된 도메인의 API 명세서를 GitHub 코드 기반으로 분석하고
     Notion에 업데이트하는 에이전트를 실행합니다.
+
+    Args:
+        domain: 대상 도메인 (예: "user", "article", "all")
+        endpoint: 특정 엔드포인트 경로 (예: "/api/user/profile"). None이면 도메인 전체.
 
     Returns:
         에이전트의 최종 응답 텍스트
@@ -116,7 +120,7 @@ async def run_spec_agent(domain: str) -> str:
 
         # 초기 메시지 구성
         messages = [
-            {"role": "user", "content": build_user_message(domain)},
+            {"role": "user", "content": build_user_message(domain, endpoint)},
         ]
 
         # Agentic loop

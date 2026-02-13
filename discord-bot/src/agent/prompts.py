@@ -103,7 +103,7 @@ def _format_domain_paths() -> str:
     return "\n".join(lines)
 
 
-def build_user_message(domain: str) -> str:
+def build_user_message(domain: str, endpoint: str | None = None) -> str:
     if domain == "all":
         domain_list = ", ".join(VALID_DOMAINS)
         return (
@@ -113,9 +113,21 @@ def build_user_message(domain: str) -> str:
     paths = DOMAIN_REGISTRY.get(domain)
     if not paths:
         return f"'{domain}' 도메인을 찾을 수 없습니다. 유효한 도메인: {', '.join(VALID_DOMAINS)}"
-    return (
+
+    base_msg = (
         f"'{domain}' 도메인의 API 명세서를 업데이트해주세요.\n"
         f"Controller 경로: `{paths['controller']}`\n"
         f"DTO 경로: `{paths['dto']}`\n"
-        "GitHub에서 해당 파일들을 읽고, Notion의 기존 명세서를 최신 코드 기반으로 업데이트하세요."
     )
+
+    if endpoint:
+        base_msg += (
+            f"\n**특정 엔드포인트만 업데이트하세요**: `{endpoint}`\n"
+            "Controller에서 해당 엔드포인트 매핑을 찾고, 관련 DTO만 분석하여 "
+            "Notion 명세서에서 해당 엔드포인트 부분만 업데이트하세요. "
+            "다른 엔드포인트는 수정하지 마세요."
+        )
+    else:
+        base_msg += "GitHub에서 해당 파일들을 읽고, Notion의 기존 명세서를 최신 코드 기반으로 업데이트하세요."
+
+    return base_msg
