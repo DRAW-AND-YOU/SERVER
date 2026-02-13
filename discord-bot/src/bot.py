@@ -1,11 +1,13 @@
 import logging
 import re
+from pathlib import Path
 
 import discord
 from discord import app_commands
 
-from src.config import DISCORD_ALLOWED_CHANNEL_IDS
+from src.config import CODE_REVIEW_REPO_PATH, DISCORD_ALLOWED_CHANNEL_IDS
 from src.agent.prompts import VALID_DOMAINS
+from src.agent.review_agent import run_codex_review
 from src.agent.spec_agent import run_spec_agent
 
 logger = logging.getLogger(__name__)
@@ -108,6 +110,38 @@ def create_bot() -> discord.Client:
         except Exception as e:
             logger.exception("Agent failed for target=%s", target)
             for chunk in _split_message(_build_error_text(e)):
+                await interaction.followup.send(chunk)
+
+    # --- 슬래시 커맨드: /codex-review ---
+    @tree.command(name="codex-review", description="Codex CLI로 Git 변경사항 코드 리뷰를 수행합니다")
+    @app_commands.describe(
+        target="working(기본), staged, 또는 비교 브랜치명(예: main, dev)",
+    )
+    async def codex_review(
+        interaction: discord.Interaction,
+        target: str | None = None,
+    ) -> None:
+        if not _is_allowed_channel(interaction.channel_id):
+            await interaction.response.send_message(
+                "이 채널에서는 사용할 수 없습니다.", ephemeral=True
+            )
+            return
+
+        await interaction.response.defer(thinking=True)
+        normalized_target = (target or "working").strip() or "working"
+        logger.info("codex-review command: target=%s by %s", normalized_target, interaction.user)
+
+        try:
+            repo_path = Path(CODE_REVIEW_REPO_PATH) if CODE_REVIEW_REPO_PATH else None
+            result = await run_codex_review(normalized_target, repo_path=repo_path)
+            for chunk in _split_message(f"**[{normalized_target}] 코드 리뷰 완료**\n\n{result}"):
+                await interaction.followup.send(chunk)
+        except Exception as e:
+            logger.exception("Codex review failed for target=%s", normalized_target)
+            err = str(e).strip() or e.__class__.__name__
+            if len(err) > MAX_ERROR_PREVIEW:
+                err = err[:MAX_ERROR_PREVIEW] + "... (truncated)"
+            for chunk in _split_message(f"코드 리뷰 중 오류가 발생했습니다:\n{err}"):
                 await interaction.followup.send(chunk)
 
     # --- 자연어 메시지 핸들러 ---

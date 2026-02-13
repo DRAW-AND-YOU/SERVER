@@ -11,6 +11,7 @@ DISCORD_ALLOWED_CHANNEL_IDS: list[int] = [
     for ch in os.getenv("DISCORD_ALLOWED_CHANNEL_IDS", "").split(",")
     if ch.strip()
 ]
+CODE_REVIEW_REPO_PATH = os.getenv("CODE_REVIEW_REPO_PATH", "").strip()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "").strip()
