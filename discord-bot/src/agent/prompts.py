@@ -1,6 +1,6 @@
 GITHUB_OWNER = "DRAW-AND-YOU"
-GITHUB_REPO = "drawandyou-server"
-GITHUB_BRANCH = "main"
+GITHUB_REPO = "SERVER"
+GITHUB_BRANCH = "dev"
 
 BASE_PATH = "src/main/java/com/drawandyou/drawandyou_server"
 
