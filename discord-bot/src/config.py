@@ -5,20 +5,20 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN", "")
+DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN", "").strip()
 DISCORD_ALLOWED_CHANNEL_IDS: list[int] = [
     int(ch.strip())
     for ch in os.getenv("DISCORD_ALLOWED_CHANNEL_IDS", "").split(",")
     if ch.strip()
 ]
 
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
-NOTION_API_TOKEN = os.getenv("NOTION_API_TOKEN", "")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "").strip()
+NOTION_API_TOKEN = os.getenv("NOTION_API_TOKEN", "").strip()
 
 REQUIRED_VARS = {
     "DISCORD_BOT_TOKEN": DISCORD_BOT_TOKEN,
-    "ANTHROPIC_API_KEY": ANTHROPIC_API_KEY,
+    "GEMINI_API_KEY": GEMINI_API_KEY,
     "GITHUB_TOKEN": GITHUB_TOKEN,
     "NOTION_API_TOKEN": NOTION_API_TOKEN,
 }

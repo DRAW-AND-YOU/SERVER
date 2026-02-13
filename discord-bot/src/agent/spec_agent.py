@@ -1,18 +1,20 @@
+import asyncio
 import json
 import logging
 from contextlib import AsyncExitStack
+from urllib import error, request
 
-import anthropic
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
-from src.config import ANTHROPIC_API_KEY, GITHUB_TOKEN, NOTION_API_TOKEN
+from src.config import GEMINI_API_KEY, GITHUB_TOKEN, NOTION_API_TOKEN
 from src.agent.prompts import SYSTEM_PROMPT, build_user_message
 
 logger = logging.getLogger(__name__)
 
-MODEL = "claude-sonnet-4-5-20250929"
+MODEL = "gemini-2.5-pro"
 MAX_TURNS = 30
+GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
 
 
 def _make_github_params() -> StdioServerParameters:
@@ -41,16 +43,20 @@ def _make_notion_params() -> StdioServerParameters:
 async def _collect_tools(
     session: ClientSession, server_name: str
 ) -> list[dict]:
-    """MCP 세션에서 도구 목록을 가져와 Claude API 형식으로 변환."""
+    """MCP 세션에서 도구 목록을 가져와 Gemini 함수 선언 형식으로 변환."""
     result = await session.list_tools()
     tools = []
     for tool in result.tools:
-        tool_schema = {
-            "name": f"{server_name}__{tool.name}",
-            "description": tool.description or "",
-            "input_schema": tool.inputSchema,
-        }
-        tools.append(tool_schema)
+        function_name = f"{server_name}__{tool.name}"
+        schema = tool.inputSchema or {"type": "object", "properties": {}}
+
+        tools.append(
+            {
+                "name": function_name,
+                "description": tool.description or "",
+                "parameters": schema,
+            }
+        )
     return tools
 
 
@@ -69,7 +75,6 @@ async def _call_tool(
 
     result = await session.call_tool(actual_tool_name, tool_input)
 
-    # MCP 결과를 텍스트로 변환
     text_parts = []
     for content in result.content:
         if hasattr(content, "text"):
@@ -77,6 +82,53 @@ async def _call_tool(
         else:
             text_parts.append(str(content))
     return "\n".join(text_parts)
+
+
+def _gemini_request(payload: dict) -> dict:
+    url = GEMINI_ENDPOINT.format(model=MODEL, api_key=GEMINI_API_KEY)
+    req = request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+
+    try:
+        with request.urlopen(req, timeout=120) as resp:
+            body = resp.read().decode("utf-8")
+            return json.loads(body)
+    except error.HTTPError as e:
+        body = e.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"Gemini API error ({e.code}): {body}") from e
+    except error.URLError as e:
+        raise RuntimeError(f"Gemini API connection error: {e.reason}") from e
+
+
+async def _generate_with_gemini(
+    contents: list[dict],
+    function_declarations: list[dict],
+) -> dict:
+    payload = {
+        "system_instruction": {
+            "parts": [{"text": SYSTEM_PROMPT}],
+        },
+        "contents": contents,
+        "tools": [{"function_declarations": function_declarations}],
+        "generation_config": {
+            "temperature": 0,
+            "max_output_tokens": 8192,
+        },
+    }
+    return await asyncio.to_thread(_gemini_request, payload)
+
+
+def _extract_parts(response: dict) -> list[dict]:
+    candidates = response.get("candidates") or []
+    if not candidates:
+        raise RuntimeError(f"Gemini returned no candidates: {response}")
+
+    content = candidates[0].get("content") or {}
+    return content.get("parts") or []
 
 
 async def run_spec_agent(domain: str, endpoint: str | None = None) -> str:
@@ -91,11 +143,9 @@ async def run_spec_agent(domain: str, endpoint: str | None = None) -> str:
     Returns:
         에이전트의 최종 응답 텍스트
     """
-    client = anthropic.AsyncAnthropic(api_key=ANTHROPIC_API_KEY)
     stack = AsyncExitStack()
 
     try:
-        # GitHub MCP 서버 연결
         github_read, github_write = await stack.enter_async_context(
             stdio_client(_make_github_params())
         )
@@ -104,7 +154,6 @@ async def run_spec_agent(domain: str, endpoint: str | None = None) -> str:
         )
         await github_session.initialize()
 
-        # Notion MCP 서버 연결
         notion_read, notion_write = await stack.enter_async_context(
             stdio_client(_make_notion_params())
         )
@@ -115,7 +164,6 @@ async def run_spec_agent(domain: str, endpoint: str | None = None) -> str:
 
         sessions = {"github": github_session, "notion": notion_session}
 
-        # 두 서버에서 도구 목록 수집
         github_tools = await _collect_tools(github_session, "github")
         notion_tools = await _collect_tools(notion_session, "notion")
         all_tools = github_tools + notion_tools
@@ -125,62 +173,59 @@ async def run_spec_agent(domain: str, endpoint: str | None = None) -> str:
             len(all_tools), len(github_tools), len(notion_tools),
         )
 
-        # 초기 메시지 구성
-        messages = [
-            {"role": "user", "content": build_user_message(domain, endpoint)},
+        contents: list[dict] = [
+            {
+                "role": "user",
+                "parts": [{"text": build_user_message(domain, endpoint)}],
+            }
         ]
 
-        # Agentic loop
         for turn in range(MAX_TURNS):
             logger.info("Agent turn %d/%d", turn + 1, MAX_TURNS)
 
-            response = await client.messages.create(
-                model=MODEL,
-                max_tokens=8192,
-                system=SYSTEM_PROMPT,
-                tools=all_tools,
-                messages=messages,
-            )
+            response = await _generate_with_gemini(contents, all_tools)
+            parts = _extract_parts(response)
 
-            # 응답에서 텍스트와 tool_use 블록 분리
-            assistant_content = response.content
-            messages.append({"role": "assistant", "content": assistant_content})
+            contents.append({"role": "model", "parts": parts})
 
-            # stop_reason이 end_turn이면 완료
-            if response.stop_reason == "end_turn":
-                # 최종 텍스트 응답 추출
-                final_text = ""
-                for block in assistant_content:
-                    if hasattr(block, "text"):
-                        final_text += block.text
+            function_calls = [
+                p["functionCall"]
+                for p in parts
+                if "functionCall" in p
+            ]
+
+            if not function_calls:
+                final_text = "\n".join(
+                    p.get("text", "")
+                    for p in parts
+                    if p.get("text")
+                ).strip()
                 return final_text or "명세서 업데이트가 완료되었습니다."
 
-            # tool_use 블록이 있으면 실행
-            tool_results = []
-            for block in assistant_content:
-                if block.type == "tool_use":
-                    logger.info("Calling tool: %s", block.name)
-                    try:
-                        result_text = await _call_tool(
-                            sessions, block.name, block.input
-                        )
-                    except Exception as e:
-                        logger.error("Tool call failed: %s", e)
-                        result_text = json.dumps({"error": str(e)})
+            function_response_parts: list[dict] = []
+            for call in function_calls:
+                tool_name = call.get("name", "")
+                tool_args = call.get("args") or {}
+                logger.info("Calling tool: %s", tool_name)
 
-                    tool_results.append(
-                        {
-                            "type": "tool_result",
-                            "tool_use_id": block.id,
-                            "content": result_text,
+                try:
+                    result_text = await _call_tool(sessions, tool_name, tool_args)
+                except Exception as e:
+                    logger.exception("Tool call failed: %s", e)
+                    result_text = json.dumps({"error": str(e)})
+
+                function_response_parts.append(
+                    {
+                        "functionResponse": {
+                            "name": tool_name,
+                            "response": {
+                                "content": result_text,
+                            },
                         }
-                    )
+                    }
+                )
 
-            if tool_results:
-                messages.append({"role": "user", "content": tool_results})
-            else:
-                # tool_use도 없고 end_turn도 아닌 경우 (예: max_tokens 도달)
-                break
+            contents.append({"role": "user", "parts": function_response_parts})
 
         return "최대 턴 수에 도달했습니다. 일부 작업이 완료되지 않았을 수 있습니다."
 
