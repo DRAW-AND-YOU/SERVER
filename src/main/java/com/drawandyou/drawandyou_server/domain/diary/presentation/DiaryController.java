@@ -2,6 +2,7 @@ package com.drawandyou.drawandyou_server.domain.diary.presentation;
 
 import com.drawandyou.drawandyou_server.domain.diary.application.service.DiaryService;
 import com.drawandyou.drawandyou_server.domain.diary.presentation.dto.request.DiaryCreateRequest;
+import com.drawandyou.drawandyou_server.domain.diary.presentation.dto.request.DiaryUpdateRequest;
 import com.drawandyou.drawandyou_server.domain.diary.presentation.dto.response.DiaryCalendarResponse;
 import com.drawandyou.drawandyou_server.domain.diary.presentation.dto.response.DiaryResponse;
 import com.drawandyou.drawandyou_server.domain.diary.presentation.message.ResponseMessage;
@@ -65,5 +66,16 @@ public class DiaryController {
 
         DiaryResponse response = diaryService.getDiary(userId, diaryId);
         return ApiResponse.success(HttpStatus.OK, ResponseMessage.DIARY_GET_SUCCESS.getMessage(), response);
+    }
+
+    @Operation(summary = "일기 수정")
+    @PutMapping("/{diaryId}")
+    public ApiResponse<DiaryResponse> updateDiary(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long diaryId,
+            @RequestBody @Valid DiaryUpdateRequest request) {
+
+        DiaryResponse response = diaryService.update(userId, diaryId, request);
+        return ApiResponse.success(HttpStatus.OK, ResponseMessage.DIARY_UPDATE_SUCCESS.getMessage(), response);
     }
 }
