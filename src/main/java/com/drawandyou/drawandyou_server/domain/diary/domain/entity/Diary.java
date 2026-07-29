@@ -50,4 +50,10 @@ public class Diary extends BaseEntity {
                 .build();
     }
 
+    public void update(String title, String content, EmotionKeyword emotionKeyword) {
+        this.title = title;
+        this.content = content;
+        this.emotionKeyword = emotionKeyword;
+    }
+
 }

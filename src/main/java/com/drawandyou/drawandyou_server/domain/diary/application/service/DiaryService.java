@@ -5,6 +5,7 @@ import com.drawandyou.drawandyou_server.domain.diary.domain.repository.DiaryRepo
 import com.drawandyou.drawandyou_server.domain.diary.exception.DiaryExistsException;
 import com.drawandyou.drawandyou_server.domain.diary.exception.NotDiaryOwnerException;
 import com.drawandyou.drawandyou_server.domain.diary.presentation.dto.request.DiaryCreateRequest;
+import com.drawandyou.drawandyou_server.domain.diary.presentation.dto.request.DiaryUpdateRequest;
 import com.drawandyou.drawandyou_server.domain.diary.presentation.dto.response.DiaryCalendarResponse;
 import com.drawandyou.drawandyou_server.domain.diary.presentation.dto.response.DiaryResponse;
 import com.drawandyou.drawandyou_server.global.client.fastapi.FastApiClient;
@@ -74,6 +75,13 @@ public class DiaryService {
 
     public DiaryCalendarResponse getDiariesForCalendar(Long userId, LocalDate startDate, LocalDate endDate) {
        return  diaryRepository.findDiariesForCalendar(userId, startDate, endDate);
+    }
+
+    @Transactional
+    public DiaryResponse update(Long userId, Long diaryId, DiaryUpdateRequest request) {
+        Diary diary = findDiaryAndVerifyOwner(userId, diaryId);
+        diary.update(request.title(), request.content(), request.keyword());
+        return DiaryResponse.from(diary);
     }
 
 }
